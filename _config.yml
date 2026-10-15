@@ -1,3 +1,10 @@
-title: Daily AI Updates
-description: AI news, reviewed by a human
+title: Daily DevOps & AI Updates
+description: DevOps and AI news, collected every morning
 theme: minima
+
+# Files and folders that are tools, not website pages
+exclude:
+  - scripts
+  - requirements.txt
+  - README.md
+  - .venv

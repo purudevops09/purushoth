@@ -1,0 +1,68 @@
+name: Daily digest and site deploy
+
+on:
+  schedule:
+    - cron: "30 2 * * *"   # 02:30 UTC = 08:00 IST, every day
+  workflow_dispatch:         # "Run workflow" button in the Actions tab
+  push:
+    branches: [main]         # also redeploy when you push changes yourself
+
+permissions:
+  contents: write            # commit the new digest back to the repo
+  pages: write               # deploy to GitHub Pages
+  id-token: write            # required by deploy-pages
+
+concurrency:
+  group: pages
+  cancel-in-progress: false  # never interrupt a deploy halfway
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: pip install feedparser
+
+      - name: Build today's digest
+        if: github.event_name != 'push'
+        run: python scripts/build_digest.py --topic all --no-open
+
+      - name: Commit digest to the repo (keeps history in Git)
+        if: github.event_name != 'push'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898283+github-actions[bot]@users.noreply.github.com"
+          git add digests/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            git commit -m "digest: $(date -u +%F)"
+            git push
+          fi
+
+      - uses: actions/configure-pages@v5
+
+      - name: Build the Jekyll site
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+
+      - uses: actions/upload-pages-artifact@v3
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
