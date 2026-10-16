@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily reading list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fb; --surface: #ffffff; --ink: #1a2130; --muted: #5a6476;
+    --line: #dfe4ee; --l: 42%; --s: 62%;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121620; --surface: #1a1f2b; --ink: #e7eaf0; --muted: #9aa3b5;
+            --line: #2a3142; --l: 70%; --s: 70%; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
+  header .date { font-size: 1.15rem; font-weight: 500; margin: 0; }
+  header .sub { color: var(--muted); margin: 4px 0 28px; font-size: 0.95rem; }
+
+  .mix { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 3px; margin-bottom: 18px; }
+  .seg { background: hsl(var(--h) var(--s) var(--l)); min-width: 6px; }
+
+  .controls { position: sticky; top: 0; z-index: 2; background: var(--bg);
+              padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { font: inherit; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--h) var(--s) var(--l)); }
+  .chip b { font-weight: 600; color: var(--muted); }
+  .chip.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .chip:focus-visible, .read-btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid hsl(212 80% 55%); outline-offset: 2px; }
+  .tools { display: flex; gap: 10px; align-items: center; }
+  input[type=search] { flex: 1; font: inherit; padding: 8px 12px; border-radius: 8px;
+                       border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  label.hide { font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+
+  .item { position: relative; padding: 20px 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .item::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 4px;
+                  border-radius: 2px; background: hsl(var(--h) var(--s) var(--l)); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--muted); }
+  .meta .cat { color: hsl(var(--h) var(--s) var(--l)); font-weight: 600; }
+  .item h2 { font-size: 1.18rem; line-height: 1.35; margin: 4px 0 6px; font-weight: 600; }
+  .item h2 a { color: var(--ink); text-decoration: none; }
+  .item h2 a:hover { text-decoration: underline; text-decoration-color: hsl(var(--h) var(--s) var(--l)); text-underline-offset: 3px; }
+  .item p { margin: 0 0 8px; color: var(--muted); max-width: 68ch; }
+  .read-btn { font: inherit; font-size: 0.8rem; background: none; border: 0; padding: 0;
+              color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .item.read { opacity: 0.45; }
+  .item.read .read-btn::after { content: " (undo)"; }
+  .hidden { display: none; }
+  .empty { color: var(--muted); padding: 32px 0; }
+  @media (max-width: 520px) { header h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily reading list</h1>
+    <p class="date">Friday, 16 October 2026</p>
+    <p class="sub">26 stories from the last 24 hours, fetched 07:23 UTC</p>
+    <div class="mix" aria-hidden="true"><span class="seg" style="--h:148;flex:5"></span><span class="seg" style="--h:46;flex:5"></span><span class="seg" style="--h:95;flex:5"></span><span class="seg" style="--h:4;flex:4"></span><span class="seg" style="--h:335;flex:4"></span><span class="seg" style="--h:212;flex:2"></span><span class="seg" style="--h:182;flex:1"></span></div>
+  </header>
+  <div class="controls">
+    <div class="chips"><button class="chip active" data-cat="all">All <b>26</b></button><button class="chip" data-cat="CI/CD and tooling" style="--h:148"><i></i>CI/CD and tooling <b>5</b></button><button class="chip" data-cat="Industry" style="--h:46"><i></i>Industry <b>5</b></button><button class="chip" data-cat="Research" style="--h:95"><i></i>Research <b>5</b></button><button class="chip" data-cat="AI labs" style="--h:4"><i></i>AI labs <b>4</b></button><button class="chip" data-cat="Community" style="--h:335"><i></i>Community <b>4</b></button><button class="chip" data-cat="Releases" style="--h:212"><i></i>Releases <b>2</b></button><button class="chip" data-cat="Cloud native" style="--h:182"><i></i>Cloud native <b>1</b></button></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search titles and summaries" aria-label="Search">
+      <label class="hide"><input type="checkbox" id="hideRead"> Hide read</label>
+    </div>
+  </div>
+  <main id="list">
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.20665" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.20665" target="_blank" rel="noopener">The World Won&#x27;t Wait: Evaluating and Teaching Agents Under a Live Clock</a></h2>
+        <p>arXiv:2610.20665v1 Announce Type: new Abstract: Large language model (LLM) agents can solve complex interactive tasks, yet reasoning and tool calls take time. In continuously changing environments, an otherwise correct action may arrive too late. We introduce RealtimeBench, with...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.20667" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.20667" target="_blank" rel="noopener">Evaluating Model Capabilities After Benchmark Saturation</a></h2>
+        <p>arXiv:2610.20667v1 Announce Type: new Abstract: Rapid advances in AI capabilities are causing benchmarks to saturate. Once several models approach perfect scores, a benchmark loses its power to differentiate between them, and with it its utility for informing AI safety cases and...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.20669" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.20669" target="_blank" rel="noopener">Value-Informed Schedule Trimming for Accelerated Sequential Monte Carlo Guidance in Discrete Diffusion</a></h2>
+        <p>arXiv:2610.20669v1 Announce Type: new Abstract: Reward-guided discrete diffusion enables test-time alignment with downstream objectives, but applying Sequential Monte Carlo (SMC) guidance at every denoising step is computationally expensive. Active guidance steps require...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.20675" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.20675" target="_blank" rel="noopener">AlphaDiana: A Measurement System for Agents in Verifiable Reasoning Tasks</a></h2>
+        <p>arXiv:2610.20675v1 Announce Type: new Abstract: Agents pair reasoning models with harnesses that organize model calls, execute tools, load skill instructions, and retain history in memory. Understanding agent performance requires linking execution conditions to outcomes,...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.20676" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.20676" target="_blank" rel="noopener">When Correctness Feedback Erases Evidence: Phase-Separated Completeness Auditing in Verus</a></h2>
+        <p>arXiv:2610.20676v1 Announce Type: new Abstract: Correctness feedback suppresses the very evidence that specification-completeness auditing is designed to uncover: programs that satisfy a written contract but violate intended behavior. We demonstrate this objective reversal on 12...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-15-copilot-in-slack-and-teams-adds-model-and-repository-updates" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>5h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-15-copilot-in-slack-and-teams-adds-model-and-repository-updates" target="_blank" rel="noopener">Multi-repo support and other improvements for GitHub Copilot in Slack and Microsoft Teams</a></h2>
+        <p>Multi-repo support in Slack and Microsoft Teams GitHub Copilot in Slack and Microsoft Teams now supports working across multiple repositories in a single conversation. Whether you’re tracking pull requests, investigating… The post Multi-repo support and other improvements for...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/nvidia/scaling-indic-pretraining" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>5h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/nvidia/scaling-indic-pretraining" target="_blank" rel="noopener">Scaling Indic Pretraining: 2.8 Trillion Tokens and an Open Data Generation Pipeline</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/blog/2026/10/15/carbon-as-a-first-class-signal-bringing-software-carbon-intensity-to-opentelemetry/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>9h ago</span></div>
+        <h2><a href="https://www.cncf.io/blog/2026/10/15/carbon-as-a-first-class-signal-bringing-software-carbon-intensity-to-opentelemetry/" target="_blank" rel="noopener">Carbon as a first-class signal: Bringing software carbon intensity to OpenTelemetry</a></h2>
+        <p>At Observability Summit Europe 2026 in Prague, I presented a keynote titled Carbon as a First-Class Signal: Designing a Standard for OpenTelemetry. The talk explored how Software Carbon Intensity (SCI) could become part of cloud-native observability...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/hackers-hijacked-1900-github-accounts-then-they-went-after-30000-repos/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>10h ago</span></div>
+        <h2><a href="https://thenewstack.io/hackers-hijacked-1900-github-accounts-then-they-went-after-30000-repos/" target="_blank" rel="noopener">Hackers hijacked 1,900 GitHub accounts. Then they went after 30,000 repos.</a></h2>
+        <p>Hackers accessed roughly 1,900 GitHub accounts, then used them to slip credential-stealing workflows into more than 30,000 repositories. The malicious The post Hackers hijacked 1,900 GitHub accounts. Then th</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/ibm-granite/granite-switch-4-1" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>10h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/ibm-granite/granite-switch-4-1" target="_blank" rel="noopener">Granite Switch 4.1: Chat, Decisions, and Speech from One Endpoint</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-15-download-github-code-quality-license-usage-as-a-csv" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>11h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-15-download-github-code-quality-license-usage-as-a-csv" target="_blank" rel="noopener">Download GitHub Code Quality license usage as a CSV</a></h2>
+        <p>You can now download a CSV report of your GitHub Code Quality license usage to reconcile your license count with your own records. The report includes: Each active committer who… The post Download GitHub Code Quality license usage as a CSV appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-15-upcoming-deprecation-of-selected-github-copilot-models-in-mid-november" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>11h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-15-upcoming-deprecation-of-selected-github-copilot-models-in-mid-november" target="_blank" rel="noopener">Upcoming deprecation of selected GitHub Copilot models in mid-November</a></h2>
+        <p>We will deprecate the following models across all GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions) on November 16th, 2026: Model Deprecation date… The post Upcoming deprecation of selected GitHub Copilot models in...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/introducing-the-rosalind-academic-plan" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>12h ago</span></div>
+        <h2><a href="https://openai.com/index/introducing-the-rosalind-academic-plan" target="_blank" rel="noopener">Bringing GPT-Rosalind to academic research labs</a></h2>
+        <p>Introducing the Rosalind Academic Plan, offering eligible academic labs sponsored access to GPT-Rosalind and tools to advance life sciences research.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/vercel-faces-its-daemons/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>12h ago</span></div>
+        <h2><a href="https://thenewstack.io/vercel-faces-its-daemons/" target="_blank" rel="noopener">Vercel adds always-on workers to run more of your backend</a></h2>
+        <p>Vercel is giving developers more options for running their backends on its platform. At its Ship conference in San Francisco The post Vercel adds always-on workers to run more of your backend appeared first on The New Stack</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://www.currentaffairs.org/news/why-were-banning-ai" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>12h ago</span></div>
+        <h2><a href="https://www.currentaffairs.org/news/why-were-banning-ai" target="_blank" rel="noopener">Why We&#x27;re Banning AI</a></h2>
+        <p>Article URL: https://www.currentaffairs.org/news/why-were-banning-ai Comments URL: https://news.ycombinator.com/item?id=50108131 Points: 234 # Comments: 181</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/openai-gpt4o-api-shutdown/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>13h ago</span></div>
+        <h2><a href="https://thenewstack.io/openai-gpt4o-api-shutdown/" target="_blank" rel="noopener">OpenAI promised developers six months’ notice. GPT-4o users got three.</a></h2>
+        <p>OpenAI is retiring four GPT-4 models from its API on January 14, 2027. The deprecation notice the company sent developers The post OpenAI promised developers six months’ notice. GPT-4o users got three. appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/meta-muse-spark-open/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>14h ago</span></div>
+        <h2><a href="https://thenewstack.io/meta-muse-spark-open/" target="_blank" rel="noopener">Meta ships Muse Spark Open, its answer to China’s best open-weight models</a></h2>
+        <p>Meta on Thursday launched Muse Spark Open, a new 816B open model (with 42B active parameters) that the company argues The post Meta ships Muse Spark Open, its answer to China’s best open-weight models appeared first on The New Stack</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/nvidia-nemotron-bolt-laptop/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>15h ago</span></div>
+        <h2><a href="https://thenewstack.io/nvidia-nemotron-bolt-laptop/" target="_blank" rel="noopener">Nvidia squeezed a 74B agent model into 24GB so it can run on your laptop</a></h2>
+        <p>Nvidia on Thursday announced a few new additions to its Nemotron family: Nemotron 3.5 Super VL, a 120B vision-language model for The post Nvidia squeezed a 74B agent model into 24GB so it can run on your laptop appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-15-ai-scan-for-pull-requests-generally-available" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>16h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-15-ai-scan-for-pull-requests-generally-available" target="_blank" rel="noopener">AI Scan for pull requests generally available</a></h2>
+        <p>Code scanning AI Scan for pull requests is now generally available. It complements CodeQL by finding vulnerabilities in pull request changes for languages and frameworks that CodeQL does not currently… The post AI Scan for pull requests generally available appeared first on The...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/v3.6.0-rc3" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>16h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/v3.6.0-rc3" target="_blank" rel="noopener">v3.6.0-rc3</a></h2>
+        <p>Quick Start Non-HA: kubectl create namespace argocd kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.6.0-rc3/manifests/install.yaml HA: kubectl create namespace argocd kubectl apply -n argocd --server-side...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://www.simonsfoundation.org/news/simons-foundation-launches-15m-effort-to-help-mathematicians-navigate-ai-era/" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>16h ago</span></div>
+        <h2><a href="https://www.simonsfoundation.org/news/simons-foundation-launches-15m-effort-to-help-mathematicians-navigate-ai-era/" target="_blank" rel="noopener">Simons Foundation launches $15M effort to help mathematicians navigate AI era</a></h2>
+        <p>Article URL: https://www.simonsfoundation.org/news/simons-foundation-launches-15m-effort-to-help-mathematicians-navigate-ai-era/ Comments URL: https://news.ycombinator.com/item?id=50104654 Points: 237 # Comments: 192</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://blogs.gnome.org/uraeus/2026/10/15/aiandreverseengineerhardware/" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>16h ago</span></div>
+        <h2><a href="https://blogs.gnome.org/uraeus/2026/10/15/aiandreverseengineerhardware/" target="_blank" rel="noopener">Using AI to reverse engineer hardware</a></h2>
+        <p>Article URL: https://blogs.gnome.org/uraeus/2026/10/15/aiandreverseengineerhardware/ Comments URL: https://news.ycombinator.com/item?id=50104299 Points: 171 # Comments: 150</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-15-agentic-autofix-for-code-scanning-alerts-general-availability" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>17h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-15-agentic-autofix-for-code-scanning-alerts-general-availability" target="_blank" rel="noopener">Agentic autofix for code scanning alerts general availability</a></h2>
+        <p>Agentic autofix for code scanning alerts is now generally available. It remediates alerts by working across your codebase the way a developer would: it explores relevant files, proposes a fix,… The post Agentic autofix for code scanning alerts general availability appeared first...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/gitops-engine%2Fv3.6.0-rc3" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>17h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/gitops-engine%2Fv3.6.0-rc3" target="_blank" rel="noopener">gitops-engine/v3.6.0-rc3: chore: bump version to 3.6.0-rc3 on release-3.6 branch (#30219)</a></h2>
+        <p>Signed-off-by: github-actions[bot] &lt;41898282+github-actions[bot]@users.noreply.github.com&gt; Co-authored-by: github-actions[bot] &lt;41898282+github-actions[bot]@users.noreply.github.com&gt;</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/teaching-students-to-think-and-learn-through-questions" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>18h ago</span></div>
+        <h2><a href="https://openai.com/index/teaching-students-to-think-and-learn-through-questions" target="_blank" rel="noopener">Teaching students to think and learn through questions</a></h2>
+        <p>Celebrate Teachers’ Day with AI for Educators in Brazilian Portuguese and see how Study Mode can help teachers support active, step-by-step learning.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://thetheorygirlie.substack.com/p/ai-was-great-until-it-was-not" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>23h ago</span></div>
+        <h2><a href="https://thetheorygirlie.substack.com/p/ai-was-great-until-it-was-not" target="_blank" rel="noopener">AI was great until it was not</a></h2>
+        <p>Article URL: https://thetheorygirlie.substack.com/p/ai-was-great-until-it-was-not Comments URL: https://news.ycombinator.com/item?id=50100791 Points: 119 # Comments: 77</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+  </main>
+</div>
+<script>
+  const KEY = "digest-read-links";
+  let read = new Set();
+  try { read = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...read])); } catch (e) {} };
+
+  const items = [...document.querySelectorAll(".item")];
+  const q = document.getElementById("q");
+  const hideRead = document.getElementById("hideRead");
+  let cat = "all";
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    for (const el of items) {
+      const isRead = read.has(el.dataset.link);
+      el.classList.toggle("read", isRead);
+      el.querySelector(".read-btn").textContent = isRead ? "Read" : "Mark as read";
+      const show = (cat === "all" || el.dataset.cat === cat)
+        && (!term || el.textContent.toLowerCase().includes(term))
+        && !(hideRead.checked && isRead);
+      el.classList.toggle("hidden", !show);
+    }
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    cat = chip.dataset.cat;
+    apply();
+  }));
+
+  for (const el of items) {
+    el.querySelector(".read-btn").addEventListener("click", () => {
+      const link = el.dataset.link;
+      read.has(link) ? read.delete(link) : read.add(link);
+      save(); apply();
+    });
+    el.querySelector("h2 a").addEventListener("click", () => { read.add(el.dataset.link); save(); apply(); });
+  }
+  q.addEventListener("input", apply);
+  hideRead.addEventListener("change", apply);
+  apply();
+</script>
+</body>
+</html>
