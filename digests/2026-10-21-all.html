@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily reading list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fb; --surface: #ffffff; --ink: #1a2130; --muted: #5a6476;
+    --line: #dfe4ee; --l: 42%; --s: 62%;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121620; --surface: #1a1f2b; --ink: #e7eaf0; --muted: #9aa3b5;
+            --line: #2a3142; --l: 70%; --s: 70%; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
+  header .date { font-size: 1.15rem; font-weight: 500; margin: 0; }
+  header .sub { color: var(--muted); margin: 4px 0 28px; font-size: 0.95rem; }
+
+  .mix { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 3px; margin-bottom: 18px; }
+  .seg { background: hsl(var(--h) var(--s) var(--l)); min-width: 6px; }
+
+  .controls { position: sticky; top: 0; z-index: 2; background: var(--bg);
+              padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { font: inherit; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--h) var(--s) var(--l)); }
+  .chip b { font-weight: 600; color: var(--muted); }
+  .chip.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .chip:focus-visible, .read-btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid hsl(212 80% 55%); outline-offset: 2px; }
+  .tools { display: flex; gap: 10px; align-items: center; }
+  input[type=search] { flex: 1; font: inherit; padding: 8px 12px; border-radius: 8px;
+                       border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  label.hide { font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+
+  .item { position: relative; padding: 20px 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .item::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 4px;
+                  border-radius: 2px; background: hsl(var(--h) var(--s) var(--l)); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--muted); }
+  .meta .cat { color: hsl(var(--h) var(--s) var(--l)); font-weight: 600; }
+  .item h2 { font-size: 1.18rem; line-height: 1.35; margin: 4px 0 6px; font-weight: 600; }
+  .item h2 a { color: var(--ink); text-decoration: none; }
+  .item h2 a:hover { text-decoration: underline; text-decoration-color: hsl(var(--h) var(--s) var(--l)); text-underline-offset: 3px; }
+  .item p { margin: 0 0 8px; color: var(--muted); max-width: 68ch; }
+  .read-btn { font: inherit; font-size: 0.8rem; background: none; border: 0; padding: 0;
+              color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .item.read { opacity: 0.45; }
+  .item.read .read-btn::after { content: " (undo)"; }
+  .hidden { display: none; }
+  .empty { color: var(--muted); padding: 32px 0; }
+  @media (max-width: 520px) { header h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily reading list</h1>
+    <p class="date">Wednesday, 21 October 2026</p>
+    <p class="sub">26 stories from the last 24 hours, fetched 07:52 UTC</p>
+    <div class="mix" aria-hidden="true"><span class="seg" style="--h:4;flex:5"></span><span class="seg" style="--h:148;flex:5"></span><span class="seg" style="--h:46;flex:5"></span><span class="seg" style="--h:95;flex:5"></span><span class="seg" style="--h:212;flex:4"></span><span class="seg" style="--h:28;flex:1"></span><span class="seg" style="--h:335;flex:1"></span></div>
+  </header>
+  <div class="controls">
+    <div class="chips"><button class="chip active" data-cat="all">All <b>26</b></button><button class="chip" data-cat="AI labs" style="--h:4"><i></i>AI labs <b>5</b></button><button class="chip" data-cat="CI/CD and tooling" style="--h:148"><i></i>CI/CD and tooling <b>5</b></button><button class="chip" data-cat="Industry" style="--h:46"><i></i>Industry <b>5</b></button><button class="chip" data-cat="Research" style="--h:95"><i></i>Research <b>5</b></button><button class="chip" data-cat="Releases" style="--h:212"><i></i>Releases <b>4</b></button><button class="chip" data-cat="Cloud" style="--h:28"><i></i>Cloud <b>1</b></button><button class="chip" data-cat="Community" style="--h:335"><i></i>Community <b>1</b></button></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search titles and summaries" aria-label="Search">
+      <label class="hide"><input type="checkbox" id="hideRead"> Hide read</label>
+    </div>
+  </div>
+  <main id="list">
+      <article class="item" data-cat="AI labs" data-link="https://blog.google/company-news/inside-google/around-the-globe/google-asia/e-conomy-sea-report-2026/" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Google AI</span><span>3h ago</span></div>
+        <h2><a href="https://blog.google/company-news/inside-google/around-the-globe/google-asia/e-conomy-sea-report-2026/" target="_blank" rel="noopener">Southeast Asia’s digital economy to hit $368 billion</a></h2>
+        <p>Cover image for the e-Conomy SEA 2026 report titled Building the intelligent economy by Google, Temasek, and Bain and Company. A 3D illustration features a glowing yellow star surrounded by miniature scenes representing digital sectors, including data cen</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.26887" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.26887" target="_blank" rel="noopener">Navalia: Advancing Cowork Agents through Verifiable Task Synthesis and Long-Horizon Post-Training</a></h2>
+        <p>arXiv:2610.26887v1 Announce Type: new Abstract: Large language model (LLM) agents are evolving from conversational assistants into Cowork Agents capable of autonomous planning, tool use, and complex task execution. Financial analysis requires these agents to integrate...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.26899" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.26899" target="_blank" rel="noopener">Large language model and reinforcement learning based autonomous construction and progress updates</a></h2>
+        <p>arXiv:2610.26899v1 Announce Type: new Abstract: Due to the rapid growth of the global population, traditional construction methods are gradually unable to meet the current housing demand. The advancement of machine learning algorithms has encouraged researchers to explore their...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.26904" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.26904" target="_blank" rel="noopener">Pareto-Optimal RTL Code Generation via Multi-Objective Reinforcement Learning with Large Language Models</a></h2>
+        <p>arXiv:2610.26904v1 Announce Type: new Abstract: Recent studies have proposed reinforcement learning with verifiable rewards (RLVR) methods that enable LLMs to generate high-quality RTL circuits from natural-language specifications. Existing approaches optimize circuit PPA...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.26913" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.26913" target="_blank" rel="noopener">MedPAO-Assist: Edge-Deployable, Modality-Aware Agentic AI for Radiology Report Structuring</a></h2>
+        <p>arXiv:2610.26913v1 Announce Type: new Abstract: The adoption of Large Language Models for radiology report structuring has been largely dominated by either proprietary cloud-based models or large open models requiring high-end GPUs for deployment, which is a critical bottleneck...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.26924" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>3h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.26924" target="_blank" rel="noopener">DataPraxis: Scaling Analytics Tasks via Verified Workspace Evolution</a></h2>
+        <p>arXiv:2610.26924v1 Announce Type: new Abstract: General-purpose agents are increasingly expected to perform professional analytics work, which requires sustained reasoning, iterative investigation, and reliable evidence. Training these capabilities requires diverse and...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/v3.3.17" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>4h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/v3.3.17" target="_blank" rel="noopener">v3.3.17</a></h2>
+        <p>Quick Start Non-HA: kubectl create namespace argocd kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.3.17/manifests/install.yaml HA: kubectl create namespace argocd kubectl apply -n argocd --server-side...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/v3.4.12" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>7h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/v3.4.12" target="_blank" rel="noopener">v3.4.12</a></h2>
+        <p>Quick Start Non-HA: kubectl create namespace argocd kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.12/manifests/install.yaml HA: kubectl create namespace argocd kubectl apply -n argocd --server-side...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/respan-rust-ai-gateway/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>9h ago</span></div>
+        <h2><a href="https://thenewstack.io/respan-rust-ai-gateway/" target="_blank" rel="noopener">Respan spent two years building on LiteLLM. One upgrade made it start over.</a></h2>
+        <p>Respan released an open-source AI gateway written in Rust on Tuesday, after spending two years building more than 100,000 lines The post Respan spent two years building on LiteLLM. One upgrade made it start over. appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/cloudflare-rust-typescript-tsrs/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>10h ago</span></div>
+        <h2><a href="https://thenewstack.io/cloudflare-rust-typescript-tsrs/" target="_blank" rel="noopener">“We are not forking TypeScript”: Cloudflare spearheads Rust port written by agents, for agents</a></h2>
+        <p>Cloudflare is going all-out to ensure that AI coding agents can check their work without exhausting available computing resources, leading The post</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/open-model-benchmarks-production/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>11h ago</span></div>
+        <h2><a href="https://thenewstack.io/open-model-benchmarks-production/" target="_blank" rel="noopener">Assess the entire inference stack — not just open model benchmarks</a></h2>
+        <p>Impressive benchmark results should make it easy for engineers to select the right open model for the outcome they are The post Assess the en</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/v3.5.6" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>12h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/v3.5.6" target="_blank" rel="noopener">v3.5.6</a></h2>
+        <p>Quick Start Non-HA: kubectl create namespace argocd kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.6/manifests/install.yaml HA: kubectl create namespace argocd kubectl apply -n argocd --server-side...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud" data-link="https://aws.amazon.com/blogs/devops/limit-agent-permissions-and-spend-in-aws-transform-custom/" style="--h:28">
+        <div class="meta"><span class="cat">Cloud</span><span>AWS DevOps Blog</span><span>12h ago</span></div>
+        <h2><a href="https://aws.amazon.com/blogs/devops/limit-agent-permissions-and-spend-in-aws-transform-custom/" target="_blank" rel="noopener">Limit agent permissions and spend in AWS Transform custom</a></h2>
+        <p>AWS Transform custom runs an autonomous agent with shell access over your source code, using your AWS credentials. This post bounds it with three controls: a scoped trust allowlist, an execution identity separate from the one that authors, and a per-run agent-minute cap backed...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/kubernetes-hidden-latency-telemetry/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>12h ago</span></div>
+        <h2><a href="https://thenewstack.io/kubernetes-hidden-latency-telemetry/" target="_blank" rel="noopener">Your Kubernetes dashboard is green. Your users are seeing red.</a></h2>
+        <p>In cloud-native operations, few scenarios are as maddening as the “phantom slowdown.” This happens when Grafana or Kubernetes dashboards show The post</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/elevenlabs-voice-agent-tradeoffs/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>13h ago</span></div>
+        <h2><a href="https://thenewstack.io/elevenlabs-voice-agent-tradeoffs/" target="_blank" rel="noopener">ElevenLabs wants to run your voice agent. Here’s what developers give up.</a></h2>
+        <p>ElevenLabs launched Eleven Realtime on Tuesday, introducing two managed voice-agent models, Mini and Max, that integrate speech recognition, reasoning, turn-taking, The post ElevenLabs wants to run your voice agent. Here’s w</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/stable" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>13h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/stable" target="_blank" rel="noopener">stable: chore: bump version to 3.5.6 on release-3.5 branch (#30319)</a></h2>
+        <p>Signed-off-by: github-actions[bot] &lt;41898282+github-actions[bot]@users.noreply.github.com&gt; Co-authored-by: github-actions[bot] &lt;41898282+github-actions[bot]@users.noreply.github.com&gt;</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/nvidia/cosmos3-h-dreams" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>13h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/nvidia/cosmos3-h-dreams" target="_blank" rel="noopener">NVIDIA Cosmos3-H-Dreams: Bringing Clinical Surgery to Life Through Generative Simulation</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-20-bulk-migrate-branch-protections-to-rulesets-for-a-repository" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>13h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-20-bulk-migrate-branch-protections-to-rulesets-for-a-repository" target="_blank" rel="noopener">Bulk migrate branch protections to rulesets for a repository</a></h2>
+        <p>You can now convert all branch protection rules of a repository to rulesets in a single action. This is an extension of the ability to convert a single branch protection… The post Bulk migrate branch protections to rulesets for a repository appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-20-updates-to-github-secret-scanning" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>13h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-20-updates-to-github-secret-scanning" target="_blank" rel="noopener">Updates to GitHub secret scanning</a></h2>
+        <p>This update covers improvements and bug fixes for GitHub secret scanning. Update to audit log events On November 12, 2026, the business field in affected secret_scanning_alert.* and secret_scanning_push_protection.bypass audit log… The post Updates to GitHub secret scanning...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-20-dependabot-alerts-rest-api-now-includes-dependency-versions" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>14h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-20-dependabot-alerts-rest-api-now-includes-dependency-versions" target="_blank" rel="noopener">Dependabot alerts REST API now includes dependency versions</a></h2>
+        <p>You can now get the version of a vulnerable dependency directly from Dependabot alert responses in the REST API. Each alert’s dependency object includes a new version_requirement field with the… The post Dependabot alerts REST API now includes dependency versions appeared first...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-20-github-package-firewall-in-public-preview" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>15h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-20-github-package-firewall-in-public-preview" target="_blank" rel="noopener">GitHub package firewall in public preview</a></h2>
+        <p>An increasing number of malware attacks exploit systems at package installation time, harvesting credentials on CI/CD hosts or developer workstations without even running the package’s code. To stem this tide… The post GitHub package firewall in public preview appeared first on...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/allenai/fairstress" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>15h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/allenai/fairstress" target="_blank" rel="noopener">FairStress: A deeper evaluation of fairness in LLM decision-making</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://www.ign.com/articles/steam-fans-are-begging-for-a-no-ai-filter-as-steam-next-fest-is-filled-with-slop" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>16h ago</span></div>
+        <h2><a href="https://www.ign.com/articles/steam-fans-are-begging-for-a-no-ai-filter-as-steam-next-fest-is-filled-with-slop" target="_blank" rel="noopener">Steam Users Beg for &quot;No AI&quot; Filter as Vibecoders Flood Next Fest</a></h2>
+        <p>Article URL: https://www.ign.com/articles/steam-fans-are-begging-for-a-no-ai-filter-as-steam-next-fest-is-filled-with-slop Comments URL: https://news.ycombinator.com/item?id=50168190 Points: 176 # Comments: 205</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/ibm-research/altk-evolve-bc" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>16h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/ibm-research/altk-evolve-bc" target="_blank" rel="noopener">ALTK-Evolve: How learned memory tops the τ²-bench leaderboard on customer service tasks without a frontier model</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-20-dependabot-now-supports-npm-12-pnpm-11-and-12-and-bun-1-4" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>17h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-20-dependabot-now-supports-npm-12-pnpm-11-and-12-and-bun-1-4" target="_blank" rel="noopener">Dependabot now supports npm 12, pnpm 11 and 12, and Bun 1.4</a></h2>
+        <p>You can now upgrade your projects to npm 12, pnpm 11 or 12, or Bun 1.4 and keep receiving Dependabot updates. Support for these package manager versions is available to… The post Dependabot now supports npm 12, pnpm 11 and 12, and Bun 1.4 appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/ted-taylor-restaurant" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>21h ago</span></div>
+        <h2><a href="https://openai.com/index/ted-taylor-restaurant" target="_blank" rel="noopener">Franchisee reconciles cash in 94% less time with ChatGPT Work</a></h2>
+        <p>An independent Schlotzsky’s and Cinnabon franchisee cut menu repricing time by 95% and built a workflow that could free up $100K in cash flow.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+  </main>
+</div>
+<script>
+  const KEY = "digest-read-links";
+  let read = new Set();
+  try { read = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...read])); } catch (e) {} };
+
+  const items = [...document.querySelectorAll(".item")];
+  const q = document.getElementById("q");
+  const hideRead = document.getElementById("hideRead");
+  let cat = "all";
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    for (const el of items) {
+      const isRead = read.has(el.dataset.link);
+      el.classList.toggle("read", isRead);
+      el.querySelector(".read-btn").textContent = isRead ? "Read" : "Mark as read";
+      const show = (cat === "all" || el.dataset.cat === cat)
+        && (!term || el.textContent.toLowerCase().includes(term))
+        && !(hideRead.checked && isRead);
+      el.classList.toggle("hidden", !show);
+    }
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    cat = chip.dataset.cat;
+    apply();
+  }));
+
+  for (const el of items) {
+    el.querySelector(".read-btn").addEventListener("click", () => {
+      const link = el.dataset.link;
+      read.has(link) ? read.delete(link) : read.add(link);
+      save(); apply();
+    });
+    el.querySelector("h2 a").addEventListener("click", () => { read.add(el.dataset.link); save(); apply(); });
+  }
+  q.addEventListener("input", apply);
+  hideRead.addEventListener("change", apply);
+  apply();
+</script>
+</body>
+</html>
