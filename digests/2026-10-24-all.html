@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily reading list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fb; --surface: #ffffff; --ink: #1a2130; --muted: #5a6476;
+    --line: #dfe4ee; --l: 42%; --s: 62%;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121620; --surface: #1a1f2b; --ink: #e7eaf0; --muted: #9aa3b5;
+            --line: #2a3142; --l: 70%; --s: 70%; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
+  header .date { font-size: 1.15rem; font-weight: 500; margin: 0; }
+  header .sub { color: var(--muted); margin: 4px 0 28px; font-size: 0.95rem; }
+
+  .mix { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 3px; margin-bottom: 18px; }
+  .seg { background: hsl(var(--h) var(--s) var(--l)); min-width: 6px; }
+
+  .controls { position: sticky; top: 0; z-index: 2; background: var(--bg);
+              padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { font: inherit; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--h) var(--s) var(--l)); }
+  .chip b { font-weight: 600; color: var(--muted); }
+  .chip.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .chip:focus-visible, .read-btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid hsl(212 80% 55%); outline-offset: 2px; }
+  .tools { display: flex; gap: 10px; align-items: center; }
+  input[type=search] { flex: 1; font: inherit; padding: 8px 12px; border-radius: 8px;
+                       border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  label.hide { font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+
+  .item { position: relative; padding: 20px 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .item::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 4px;
+                  border-radius: 2px; background: hsl(var(--h) var(--s) var(--l)); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--muted); }
+  .meta .cat { color: hsl(var(--h) var(--s) var(--l)); font-weight: 600; }
+  .item h2 { font-size: 1.18rem; line-height: 1.35; margin: 4px 0 6px; font-weight: 600; }
+  .item h2 a { color: var(--ink); text-decoration: none; }
+  .item h2 a:hover { text-decoration: underline; text-decoration-color: hsl(var(--h) var(--s) var(--l)); text-underline-offset: 3px; }
+  .item p { margin: 0 0 8px; color: var(--muted); max-width: 68ch; }
+  .read-btn { font: inherit; font-size: 0.8rem; background: none; border: 0; padding: 0;
+              color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .item.read { opacity: 0.45; }
+  .item.read .read-btn::after { content: " (undo)"; }
+  .hidden { display: none; }
+  .empty { color: var(--muted); padding: 32px 0; }
+  @media (max-width: 520px) { header h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily reading list</h1>
+    <p class="date">Saturday, 24 October 2026</p>
+    <p class="sub">14 stories from the last 24 hours, fetched 07:29 UTC</p>
+    <div class="mix" aria-hidden="true"><span class="seg" style="--h:148;flex:5"></span><span class="seg" style="--h:46;flex:5"></span><span class="seg" style="--h:4;flex:3"></span><span class="seg" style="--h:182;flex:1"></span></div>
+  </header>
+  <div class="controls">
+    <div class="chips"><button class="chip active" data-cat="all">All <b>14</b></button><button class="chip" data-cat="CI/CD and tooling" style="--h:148"><i></i>CI/CD and tooling <b>5</b></button><button class="chip" data-cat="Industry" style="--h:46"><i></i>Industry <b>5</b></button><button class="chip" data-cat="AI labs" style="--h:4"><i></i>AI labs <b>3</b></button><button class="chip" data-cat="Cloud native" style="--h:182"><i></i>Cloud native <b>1</b></button></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search titles and summaries" aria-label="Search">
+      <label class="hide"><input type="checkbox" id="hideRead"> Hide read</label>
+    </div>
+  </div>
+  <main id="list">
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-23-usage-metrics-api-adds-usage-from-tools-like-opencode" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>7h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-23-usage-metrics-api-adds-usage-from-tools-like-opencode" target="_blank" rel="noopener">Usage metrics API adds usage from tools like OpenCode</a></h2>
+        <p>The Copilot usage metrics API now reports model usage from more of the tools your developers use with Copilot, including tools like OpenCode that weren’t previously captured in your reports.… The post Usage metrics API adds usage from tools like OpenCode appeared first on The...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-23-turn-notifications-into-code-with-github-copilot-in-teams" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>9h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-23-turn-notifications-into-code-with-github-copilot-in-teams" target="_blank" rel="noopener">Turn notifications into code with GitHub Copilot in Teams</a></h2>
+        <p>The new GitHub app in Teams brings notifications and Copilot together, helping teams turn issues into fixes and ship code faster without leaving the conversation. Get notified in channels, group… The post Turn notifications into code with GitHub Copilot in Teams appeared first...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/vercel-oidc-static-credentials/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>11h ago</span></div>
+        <h2><a href="https://thenewstack.io/vercel-oidc-static-credentials/" target="_blank" rel="noopener">Vercel moved to kill static credentials. Then developers spotted its own deployment token.</a></h2>
+        <p>Vercel wants to eliminate long-lived API keys from its ecosystem, and it is giving Marketplace vendors until January 2027 to The post Vercel moved to kill static credentials. Then developers spotted its own deployment token. appeare</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/kubernetes-agentic-ai-inference/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>12h ago</span></div>
+        <h2><a href="https://thenewstack.io/kubernetes-agentic-ai-inference/" target="_blank" rel="noopener">AI jobs are waiting while GPUs sit idle. Kubernetes has a new plan.</a></h2>
+        <p>Welcome to another edition of Road to KubeCon! We’re tracking movements in the Kubernetes and cloud-native ecosystem as we count The post AI jobs are waiting while G</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-23-emu-deletions-fix" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>12h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-23-emu-deletions-fix" target="_blank" rel="noopener">EMU deletions fix</a></h2>
+        <p>Between June 1 and June 13, 2026, some Enterprise Managed User accounts that were deprovisioned through SCIM were incorrectly deleted instead of being suspended and obfuscated as expected. As a… The post EMU deletions fix appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-23-public-monitoring-adds-triage-validity-api-and-webhooks" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>14h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-23-public-monitoring-adds-triage-validity-api-and-webhooks" target="_blank" rel="noopener">Public monitoring adds triage, validity, API, and webhooks</a></h2>
+        <p>Public monitoring now includes alert management capabilities like automatic validity checks to help you triage and remediate leaked secrets at scale. Alert management with dismissals, timelines, and filtering Always-on validity… The post Public monitoring adds triage, validity,...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/scaling-storage-one-billion-users-part-two" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>14h ago</span></div>
+        <h2><a href="https://openai.com/index/scaling-storage-one-billion-users-part-two" target="_blank" rel="noopener">Rapidly scaling online storage to serve over 1 billion ChatGPT users (Part II)</a></h2>
+        <p>Learn how OpenAI scaled Habitat with reliable multi-tenancy, global caching, and Azure Cosmos DB to deliver 12× faster reads for ChatGPT.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/allenai/litpivot" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>15h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/allenai/litpivot" target="_blank" rel="noopener">LitPivot: Developing research ideas through dynamic contextualization within the literature landscape</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-23-enterprise-installations-for-github-apps-generally-available" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>16h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-23-enterprise-installations-for-github-apps-generally-available" target="_blank" rel="noopener">Enterprise installations for GitHub Apps generally available</a></h2>
+        <p>Installing GitHub Apps on your enterprise is now generally available. You can replace classic PATs with GitHub Apps in more of your enterprise and organization automation with the expanded API… The post Enterprise installations for GitHub Apps generally available appeared first...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/php2shell-ai-patch-race/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>17h ago</span></div>
+        <h2><a href="https://thenewstack.io/php2shell-ai-patch-race/" target="_blank" rel="noopener">PHP2Shell was only the beginning: AI is accelerating the patch race</a></h2>
+        <p>Government websites and public services across Europe went offline this week as organizations responded to two newly disclosed PHP vulnerabilities. The post</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/linux-developer-device-management/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>17h ago</span></div>
+        <h2><a href="https://thenewstack.io/linux-developer-device-management/" target="_blank" rel="noopener">A few engineers asked IT for Linux. Then it spread to 200 machines.</a></h2>
+        <p>Linux is already part of the AI developer’s desktop toolkit. Nvidia’s DGX Spark, which became available to order on October The post</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/microsoft-streaming-speech-models/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>19h ago</span></div>
+        <h2><a href="https://thenewstack.io/microsoft-streaming-speech-models/" target="_blank" rel="noopener">Microsoft’s new voice AI can start working out what you want before you finish speaking</a></h2>
+        <p>“I think you said, ‘representative.’” It’s the fastest way to bypass automated speech recognition chatbots that fail to route human The post Microsoft’s new voice AI can start working out what you want before you finish speaking</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/blog/2026/10/23/multi-tenant-gpu-kubernetes-on-simulated-hardware-with-kamaji-and-hami/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>19h ago</span></div>
+        <h2><a href="https://www.cncf.io/blog/2026/10/23/multi-tenant-gpu-kubernetes-on-simulated-hardware-with-kamaji-and-hami/" target="_blank" rel="noopener">Multi-tenant GPU Kubernetes on simulated hardware with Kamaji and HAMi</a></h2>
+        <p>GPU teams usually face a bad trade-off. Give every team its own Kubernetes cluster and you pay for a control plane per team. Put everyone in one shared cluster and you get weak isolation. Either way,...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/securing-our-frontier-model-training-environment" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>21h ago</span></div>
+        <h2><a href="https://openai.com/index/securing-our-frontier-model-training-environment" target="_blank" rel="noopener">Securing our frontier model training environment</a></h2>
+        <p>OpenAI explains how we strengthened containment for frontier model training and evaluation, including offline environments and high-compute red-teaming.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+  </main>
+</div>
+<script>
+  const KEY = "digest-read-links";
+  let read = new Set();
+  try { read = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...read])); } catch (e) {} };
+
+  const items = [...document.querySelectorAll(".item")];
+  const q = document.getElementById("q");
+  const hideRead = document.getElementById("hideRead");
+  let cat = "all";
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    for (const el of items) {
+      const isRead = read.has(el.dataset.link);
+      el.classList.toggle("read", isRead);
+      el.querySelector(".read-btn").textContent = isRead ? "Read" : "Mark as read";
+      const show = (cat === "all" || el.dataset.cat === cat)
+        && (!term || el.textContent.toLowerCase().includes(term))
+        && !(hideRead.checked && isRead);
+      el.classList.toggle("hidden", !show);
+    }
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    cat = chip.dataset.cat;
+    apply();
+  }));
+
+  for (const el of items) {
+    el.querySelector(".read-btn").addEventListener("click", () => {
+      const link = el.dataset.link;
+      read.has(link) ? read.delete(link) : read.add(link);
+      save(); apply();
+    });
+    el.querySelector("h2 a").addEventListener("click", () => { read.add(el.dataset.link); save(); apply(); });
+  }
+  q.addEventListener("input", apply);
+  hideRead.addEventListener("change", apply);
+  apply();
+</script>
+</body>
+</html>
