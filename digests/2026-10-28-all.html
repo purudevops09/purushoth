@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily reading list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fb; --surface: #ffffff; --ink: #1a2130; --muted: #5a6476;
+    --line: #dfe4ee; --l: 42%; --s: 62%;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121620; --surface: #1a1f2b; --ink: #e7eaf0; --muted: #9aa3b5;
+            --line: #2a3142; --l: 70%; --s: 70%; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
+  header .date { font-size: 1.15rem; font-weight: 500; margin: 0; }
+  header .sub { color: var(--muted); margin: 4px 0 28px; font-size: 0.95rem; }
+
+  .mix { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 3px; margin-bottom: 18px; }
+  .seg { background: hsl(var(--h) var(--s) var(--l)); min-width: 6px; }
+
+  .controls { position: sticky; top: 0; z-index: 2; background: var(--bg);
+              padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { font: inherit; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--h) var(--s) var(--l)); }
+  .chip b { font-weight: 600; color: var(--muted); }
+  .chip.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .chip:focus-visible, .read-btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid hsl(212 80% 55%); outline-offset: 2px; }
+  .tools { display: flex; gap: 10px; align-items: center; }
+  input[type=search] { flex: 1; font: inherit; padding: 8px 12px; border-radius: 8px;
+                       border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  label.hide { font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+
+  .item { position: relative; padding: 20px 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .item::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 4px;
+                  border-radius: 2px; background: hsl(var(--h) var(--s) var(--l)); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--muted); }
+  .meta .cat { color: hsl(var(--h) var(--s) var(--l)); font-weight: 600; }
+  .item h2 { font-size: 1.18rem; line-height: 1.35; margin: 4px 0 6px; font-weight: 600; }
+  .item h2 a { color: var(--ink); text-decoration: none; }
+  .item h2 a:hover { text-decoration: underline; text-decoration-color: hsl(var(--h) var(--s) var(--l)); text-underline-offset: 3px; }
+  .item p { margin: 0 0 8px; color: var(--muted); max-width: 68ch; }
+  .read-btn { font: inherit; font-size: 0.8rem; background: none; border: 0; padding: 0;
+              color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .item.read { opacity: 0.45; }
+  .item.read .read-btn::after { content: " (undo)"; }
+  .hidden { display: none; }
+  .empty { color: var(--muted); padding: 32px 0; }
+  @media (max-width: 520px) { header h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily reading list</h1>
+    <p class="date">Wednesday, 28 October 2026</p>
+    <p class="sub">24 stories from the last 24 hours, fetched 08:46 UTC</p>
+    <div class="mix" aria-hidden="true"><span class="seg" style="--h:335;flex:5"></span><span class="seg" style="--h:46;flex:5"></span><span class="seg" style="--h:95;flex:5"></span><span class="seg" style="--h:212;flex:4"></span><span class="seg" style="--h:4;flex:3"></span><span class="seg" style="--h:148;flex:1"></span><span class="seg" style="--h:182;flex:1"></span></div>
+  </header>
+  <div class="controls">
+    <div class="chips"><button class="chip active" data-cat="all">All <b>24</b></button><button class="chip" data-cat="Community" style="--h:335"><i></i>Community <b>5</b></button><button class="chip" data-cat="Industry" style="--h:46"><i></i>Industry <b>5</b></button><button class="chip" data-cat="Research" style="--h:95"><i></i>Research <b>5</b></button><button class="chip" data-cat="Releases" style="--h:212"><i></i>Releases <b>4</b></button><button class="chip" data-cat="AI labs" style="--h:4"><i></i>AI labs <b>3</b></button><button class="chip" data-cat="CI/CD and tooling" style="--h:148"><i></i>CI/CD and tooling <b>1</b></button><button class="chip" data-cat="Cloud native" style="--h:182"><i></i>Cloud native <b>1</b></button></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search titles and summaries" aria-label="Search">
+      <label class="hide"><input type="checkbox" id="hideRead"> Hide read</label>
+    </div>
+  </div>
+  <main id="list">
+      <article class="item" data-cat="Releases" data-link="https://github.com/kubernetes/kubernetes/releases/tag/v1.36.6" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Kubernetes releases</span><span>3h ago</span></div>
+        <h2><a href="https://github.com/kubernetes/kubernetes/releases/tag/v1.36.6" target="_blank" rel="noopener">v1.36.6</a></h2>
+        <p>See kubernetes-announce@ . Additional binary downloads are linked in the CHANGELOG . See the CHANGELOG for more details.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/kubernetes/kubernetes/releases/tag/v1.37.2" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Kubernetes releases</span><span>4h ago</span></div>
+        <h2><a href="https://github.com/kubernetes/kubernetes/releases/tag/v1.37.2" target="_blank" rel="noopener">v1.37.2</a></h2>
+        <p>See kubernetes-announce@ . Additional binary downloads are linked in the CHANGELOG . See the CHANGELOG for more details.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/kubernetes/kubernetes/releases/tag/v1.34.13" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Kubernetes releases</span><span>4h ago</span></div>
+        <h2><a href="https://github.com/kubernetes/kubernetes/releases/tag/v1.34.13" target="_blank" rel="noopener">v1.34.13</a></h2>
+        <p>See kubernetes-announce@ . Additional binary downloads are linked in the CHANGELOG . See the CHANGELOG for more details.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/kubernetes/kubernetes/releases/tag/v1.35.10" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Kubernetes releases</span><span>4h ago</span></div>
+        <h2><a href="https://github.com/kubernetes/kubernetes/releases/tag/v1.35.10" target="_blank" rel="noopener">v1.35.10</a></h2>
+        <p>See kubernetes-announce@ . Additional binary downloads are linked in the CHANGELOG . See the CHANGELOG for more details.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.35942" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.35942" target="_blank" rel="noopener">Counting the Bandages: On measuring the time that AI saves</a></h2>
+        <p>arXiv:2610.35942v1 Announce Type: new Abstract: I consider what it means for AI assistance to save time. I contrast a stopwatch view, on which time saved is whatever the clock records, with a ledger view, on which it is a counterfactual that has to be read next to the errors the...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.35984" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.35984" target="_blank" rel="noopener">Enhancing Deep Learning Model Performance through Data Generation Strategies: Classification of Olive Tree Diseases</a></h2>
+        <p>arXiv:2610.35984v1 Announce Type: new Abstract: Deep learning models are highly effective in a wide range of domains, particu larly in plant disease diagnosis. However, their performance is often limited by challenges such as insufficient data and class imbalance. In our work,...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.36077" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.36077" target="_blank" rel="noopener">The Trinity:Capability-Driven Recursive Self-Improvement for Multimodal Agents</a></h2>
+        <p>arXiv:2610.36077v1 Announce Type: new Abstract: Multimodal intelligence can be viewed as human-guided co-evolution between worlds and agents through interaction. However, scaling this process faces two bottlenecks: constructing heterogeneous, verifiable environments is costly,...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.36100" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.36100" target="_blank" rel="noopener">CohortFlow: A Steerable Clinical Cohort Curation Agent with Localized Semantic Correction</a></h2>
+        <p>arXiv:2610.36100v1 Announce Type: new Abstract: Language model agents for clinical cohort curation should accommodate evolving eligibility criteria without repeatedly processing unchanged requirements. We introduce CohortFlow, a steerable agent that represents natural language...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2610.36116" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2610.36116" target="_blank" rel="noopener">Why and How to Do Science When AI Is Better at It: A Framework Grounded in Human Understanding and Direction</a></h2>
+        <p>arXiv:2610.36116v1 Announce Type: new Abstract: As AI begins to match or exceed human researchers at core scientific tasks, two questions become pressing: \emph{why} should humans keep doing science, and \emph{how} should they use AI when they do? This paper argues that the...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/genie-4-world-model/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>10h ago</span></div>
+        <h2><a href="https://thenewstack.io/genie-4-world-model/" target="_blank" rel="noopener">Google built AI agents a world to practice in. The physics still aren’t quite right.</a></h2>
+        <p>Google DeepMind introduced Genie 4 on Tuesday, a world model that renders interactive environments in real time with simulated physics, The post Google built AI agents a world to practice in. The physics still aren’t quite right. appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-10-27-github-copilot-supports-server-to-server-authentication" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>11h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-10-27-github-copilot-supports-server-to-server-authentication" target="_blank" rel="noopener">GitHub Copilot supports server-to-server authentication</a></h2>
+        <p>GitHub Copilot now supports server-to-server authentication for GitHub Apps installed on organizations, available in public preview. Services and agents built with the GitHub Copilot SDK can now make requests on… The post GitHub Copilot supports server-to-server authentication...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/replit-self-driving-company/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>11h ago</span></div>
+        <h2><a href="https://thenewstack.io/replit-self-driving-company/" target="_blank" rel="noopener">Replit’s CEO says an idea from 1937 could make the org chart obsolete</a></h2>
+        <p>Replit CEO and co-founder Amjad Masad has spent the past year watching AI agents absorb the routine execution inside his The post Replit’s CEO says an idea from 1937 could make the org chart obsolete appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/php2shell-unpatched-php-servers/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>11h ago</span></div>
+        <h2><a href="https://thenewstack.io/php2shell-unpatched-php-servers/" target="_blank" rel="noopener">“The panic hasn’t turned into patching”: What security researchers really think about the PHP2Shell response</a></h2>
+        <p>The PHP panic has not turned to patching: And that’s bad news, capital B, as PHP2Shell attacks ramp up. We The post “The panic hasn’t t</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://www.brangus.io/survival-llm" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>12h ago</span></div>
+        <h2><a href="https://www.brangus.io/survival-llm" target="_blank" rel="noopener">Survival LLM: AI assistant and emergency library that runs on your own computer</a></h2>
+        <p>Article URL: https://www.brangus.io/survival-llm Comments URL: https://news.ycombinator.com/item?id=50264853 Points: 327 # Comments: 137</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/LiquidAI/lfm3" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>15h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/LiquidAI/lfm3" target="_blank" rel="noopener">Build specialized multimodal models with LFM3</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://gizmodo.com/police-are-using-ai-to-pull-over-drivers-for-suspicious-behavior-2000831220" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>16h ago</span></div>
+        <h2><a href="https://gizmodo.com/police-are-using-ai-to-pull-over-drivers-for-suspicious-behavior-2000831220" target="_blank" rel="noopener">Police are using AI to pull over drivers for &#x27;suspicious&#x27; behavior</a></h2>
+        <p>Article URL: https://gizmodo.com/police-are-using-ai-to-pull-over-drivers-for-suspicious-behavior-2000831220 Comments URL: https://news.ycombinator.com/item?id=50261819 Points: 370 # Comments: 286</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://futurism.com/artificial-intelligence/amazon-ai-division-failure-nova" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>16h ago</span></div>
+        <h2><a href="https://futurism.com/artificial-intelligence/amazon-ai-division-failure-nova" target="_blank" rel="noopener">Amazon Is Gutting Its AI Division After Sustained Failure</a></h2>
+        <p>Article URL: https://futurism.com/artificial-intelligence/amazon-ai-division-failure-nova Comments URL: https://news.ycombinator.com/item?id=50261589 Points: 315 # Comments: 241</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/allenai/novelty-bench" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>16h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/allenai/novelty-bench" target="_blank" rel="noopener">Can we trust LLMs to judge whether a research idea is novel?</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/nebius-agentic-rl-training-bottlenecks/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>17h ago</span></div>
+        <h2><a href="https://thenewstack.io/nebius-agentic-rl-training-bottlenecks/" target="_blank" rel="noopener">Nebius cut rollout collection time by 66.9% — here’s what changed</a></h2>
+        <p>In AI agent training, you can pay for powerful GPUs and still spend much of your time waiting. Agents need The post Nebius cut</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/retell-ai" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>17h ago</span></div>
+        <h2><a href="https://openai.com/index/retell-ai" target="_blank" rel="noopener">Retell uses OpenAI models to help power 100M monthly calls</a></h2>
+        <p>GPT-6 Astra tops Retell’s voice agent benchmark, while Codex helps it reach a $1.6M annual revenue run rate per employee.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/openai-devday-models-agents/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>18h ago</span></div>
+        <h2><a href="https://thenewstack.io/openai-devday-models-agents/" target="_blank" rel="noopener">“I don’t use Astra every day”: OpenAI developer lead tells TNS why</a></h2>
+        <p>OpenAI’s recent releases have given developers more options for using AI in software. At its 2026 DevDay, the company introduced The post “I don’t use Astra every day”: OpenAI developer lead tells TNS why appeared first on T</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/blog/2026/10/27/over-500-golden-kubestronauts-the-evolving-standard-for-cloud-native-mastery/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>21h ago</span></div>
+        <h2><a href="https://www.cncf.io/blog/2026/10/27/over-500-golden-kubestronauts-the-evolving-standard-for-cloud-native-mastery/" target="_blank" rel="noopener">Over 500 Golden Kubestronauts: The evolving standard for cloud native mastery</a></h2>
+        <p>Since launching the Kubestronaut program at KubeCon Paris in 2024, the community has grown faster than expected. Today, more than 570 professionals have reached an even higher bar: Golden Kubestronaut status. Becoming a standard Kubestronaut is...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://spectrum.ieee.org/wikipedia-wikiproject-ai-writing-cleanup" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>21h ago</span></div>
+        <h2><a href="https://spectrum.ieee.org/wikipedia-wikiproject-ai-writing-cleanup" target="_blank" rel="noopener">Wikipedia&#x27;s Cleanup of AI-Generated Content</a></h2>
+        <p>Article URL: https://spectrum.ieee.org/wikipedia-wikiproject-ai-writing-cleanup Comments URL: https://news.ycombinator.com/item?id=50257326 Points: 477 # Comments: 216</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://oioannou.com/blog/ai-promised-less-work/" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>21h ago</span></div>
+        <h2><a href="https://oioannou.com/blog/ai-promised-less-work/" target="_blank" rel="noopener">AI promised less work. I&#x27;ve never worked more</a></h2>
+        <p>Article URL: https://oioannou.com/blog/ai-promised-less-work/ Comments URL: https://news.ycombinator.com/item?id=50257325 Points: 634 # Comments: 629</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+  </main>
+</div>
+<script>
+  const KEY = "digest-read-links";
+  let read = new Set();
+  try { read = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...read])); } catch (e) {} };
+
+  const items = [...document.querySelectorAll(".item")];
+  const q = document.getElementById("q");
+  const hideRead = document.getElementById("hideRead");
+  let cat = "all";
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    for (const el of items) {
+      const isRead = read.has(el.dataset.link);
+      el.classList.toggle("read", isRead);
+      el.querySelector(".read-btn").textContent = isRead ? "Read" : "Mark as read";
+      const show = (cat === "all" || el.dataset.cat === cat)
+        && (!term || el.textContent.toLowerCase().includes(term))
+        && !(hideRead.checked && isRead);
+      el.classList.toggle("hidden", !show);
+    }
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    cat = chip.dataset.cat;
+    apply();
+  }));
+
+  for (const el of items) {
+    el.querySelector(".read-btn").addEventListener("click", () => {
+      const link = el.dataset.link;
+      read.has(link) ? read.delete(link) : read.add(link);
+      save(); apply();
+    });
+    el.querySelector("h2 a").addEventListener("click", () => { read.add(el.dataset.link); save(); apply(); });
+  }
+  q.addEventListener("input", apply);
+  hideRead.addEventListener("change", apply);
+  apply();
+</script>
+</body>
+</html>
