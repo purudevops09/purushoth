@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily reading list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fb; --surface: #ffffff; --ink: #1a2130; --muted: #5a6476;
+    --line: #dfe4ee; --l: 42%; --s: 62%;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121620; --surface: #1a1f2b; --ink: #e7eaf0; --muted: #9aa3b5;
+            --line: #2a3142; --l: 70%; --s: 70%; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
+  header .date { font-size: 1.15rem; font-weight: 500; margin: 0; }
+  header .sub { color: var(--muted); margin: 4px 0 28px; font-size: 0.95rem; }
+
+  .mix { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 3px; margin-bottom: 18px; }
+  .seg { background: hsl(var(--h) var(--s) var(--l)); min-width: 6px; }
+
+  .controls { position: sticky; top: 0; z-index: 2; background: var(--bg);
+              padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { font: inherit; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--h) var(--s) var(--l)); }
+  .chip b { font-weight: 600; color: var(--muted); }
+  .chip.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .chip:focus-visible, .read-btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid hsl(212 80% 55%); outline-offset: 2px; }
+  .tools { display: flex; gap: 10px; align-items: center; }
+  input[type=search] { flex: 1; font: inherit; padding: 8px 12px; border-radius: 8px;
+                       border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  label.hide { font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+
+  .item { position: relative; padding: 20px 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .item::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 4px;
+                  border-radius: 2px; background: hsl(var(--h) var(--s) var(--l)); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--muted); }
+  .meta .cat { color: hsl(var(--h) var(--s) var(--l)); font-weight: 600; }
+  .item h2 { font-size: 1.18rem; line-height: 1.35; margin: 4px 0 6px; font-weight: 600; }
+  .item h2 a { color: var(--ink); text-decoration: none; }
+  .item h2 a:hover { text-decoration: underline; text-decoration-color: hsl(var(--h) var(--s) var(--l)); text-underline-offset: 3px; }
+  .item p { margin: 0 0 8px; color: var(--muted); max-width: 68ch; }
+  .read-btn { font: inherit; font-size: 0.8rem; background: none; border: 0; padding: 0;
+              color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .item.read { opacity: 0.45; }
+  .item.read .read-btn::after { content: " (undo)"; }
+  .hidden { display: none; }
+  .empty { color: var(--muted); padding: 32px 0; }
+  @media (max-width: 520px) { header h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily reading list</h1>
+    <p class="date">Tuesday, 03 November 2026</p>
+    <p class="sub">30 stories from the last 24 hours, fetched 09:46 UTC</p>
+    <div class="mix" aria-hidden="true"><span class="seg" style="--h:4;flex:6"></span><span class="seg" style="--h:335;flex:5"></span><span class="seg" style="--h:46;flex:5"></span><span class="seg" style="--h:95;flex:5"></span><span class="seg" style="--h:212;flex:4"></span><span class="seg" style="--h:148;flex:2"></span><span class="seg" style="--h:200;flex:2"></span><span class="seg" style="--h:182;flex:1"></span></div>
+  </header>
+  <div class="controls">
+    <div class="chips"><button class="chip active" data-cat="all">All <b>30</b></button><button class="chip" data-cat="AI labs" style="--h:4"><i></i>AI labs <b>6</b></button><button class="chip" data-cat="Community" style="--h:335"><i></i>Community <b>5</b></button><button class="chip" data-cat="Industry" style="--h:46"><i></i>Industry <b>5</b></button><button class="chip" data-cat="Research" style="--h:95"><i></i>Research <b>5</b></button><button class="chip" data-cat="Releases" style="--h:212"><i></i>Releases <b>4</b></button><button class="chip" data-cat="CI/CD and tooling" style="--h:148"><i></i>CI/CD and tooling <b>2</b></button><button class="chip" data-cat="Containers" style="--h:200"><i></i>Containers <b>2</b></button><button class="chip" data-cat="Cloud native" style="--h:182"><i></i>Cloud native <b>1</b></button></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search titles and summaries" aria-label="Search">
+      <label class="hide"><input type="checkbox" id="hideRead"> Hide read</label>
+    </div>
+  </div>
+  <main id="list">
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.00159" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.00159" target="_blank" rel="noopener">A Generalized Sparse Fuzzy Clustering Framework with Automated Cluster Cardinality Estimation Ability</a></h2>
+        <p>arXiv:2611.00159v1 Announce Type: new Abstract: Fuzzy clustering provides a robust framework for handling ambiguous and overlapping data boundaries, yet its traditional formulation generates entirely dense membership assignments that limit noise resilience and prevent estimating...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.00165" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.00165" target="_blank" rel="noopener">Learning to bid and bundle: a posterior-sampling agent for online retail</a></h2>
+        <p>arXiv:2611.00165v1 Announce Type: new Abstract: An online retailer launching a perishable product bids for sponsored-search clicks, discounts a bundle with an always-stocked staple and displays its remaining stock, which raises willingness to pay. It knows neither how clicks...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.00166" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.00166" target="_blank" rel="noopener">Early Stopping in Large Reasoning Models: A Survey and Empirical Audit of Efficiency and Reliability</a></h2>
+        <p>arXiv:2611.00166v1 Announce Type: new Abstract: Large reasoning models can improve accuracy by generating longer reasoning traces, but some of this computation may be unnecessary. Early-stopping methods aim to stop once enough reasoning is available to answer. Evaluating these...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.00169" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.00169" target="_blank" rel="noopener">PatchScout: Thematic Web Data Collection via Information Foraging</a></h2>
+        <p>arXiv:2611.00169v1 Announce Type: new Abstract: Researchers often need web corpora that are not answers to a single query, but reusable collections of documents spanning many decentralized sources. We refer to this problem as thematic web data collection: assembling semantically...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.00171" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.00171" target="_blank" rel="noopener">Reimagining Text-to-SQL: A Survey of Large Language Model Architectures and Strategies</a></h2>
+        <p>arXiv:2611.00171v1 Announce Type: new Abstract: Text-to-SQL systems translate natural language questions into executable SQL queries, democratizing access to relational data. Early approaches relied on handcrafted rules and template matching, while subsequent neural methods...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/openai-pando-git-backend/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>9h ago</span></div>
+        <h2><a href="https://thenewstack.io/openai-pando-git-backend/" target="_blank" rel="noopener">OpenAI built itself a new Git backend, too</a></h2>
+        <p>OpenAI on Monday detailed how it built a new Git backend for its monorepo to power the ever-increasing number of The post OpenAI built itself a new Git backend, too appeared first on The New Stack .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/transformers-mic" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>9h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/transformers-mic" target="_blank" rel="noopener">Transformers Model Integration Contracts</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/claude-code-developer-refusals/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>12h ago</span></div>
+        <h2><a href="https://thenewstack.io/claude-code-developer-refusals/" target="_blank" rel="noopener">Developers are downgrading their AI on purpose — and it’s working</a></h2>
+        <p>Anthropic has confirmed that it added new restrictions to Claude Code to prevent users from recreating existing video games. But The post Developers are downgrading their AI on purpose — and it’s working appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/v3.3.19" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>13h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/v3.3.19" target="_blank" rel="noopener">v3.3.19</a></h2>
+        <p>Quick Start Non-HA: kubectl create namespace argocd kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.3.19/manifests/install.yaml HA: kubectl create namespace argocd kubectl apply -n argocd --server-side...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/v3.5.7" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>13h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/v3.5.7" target="_blank" rel="noopener">v3.5.7</a></h2>
+        <p>Quick Start Non-HA: kubectl create namespace argocd kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.5.7/manifests/install.yaml HA: kubectl create namespace argocd kubectl apply -n argocd --server-side...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/v3.4.13" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>13h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/v3.4.13" target="_blank" rel="noopener">v3.4.13</a></h2>
+        <p>Quick Start Non-HA: kubectl create namespace argocd kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/v3.4.13/manifests/install.yaml HA: kubectl create namespace argocd kubectl apply -n argocd --server-side...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://www.cnbc.com/2026/11/02/oracle-files-to-sell-20-billion-in-new-stock-bonds-to-finance-ai-buildout.html" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>14h ago</span></div>
+        <h2><a href="https://www.cnbc.com/2026/11/02/oracle-files-to-sell-20-billion-in-new-stock-bonds-to-finance-ai-buildout.html" target="_blank" rel="noopener">Oracle files to sell $20B in new stock, bonds to finance AI buildout</a></h2>
+        <p>Article URL: https://www.cnbc.com/2026/11/02/oracle-files-to-sell-20-billion-in-new-stock-bonds-to-finance-ai-buildout.html Comments URL: https://news.ycombinator.com/item?id=50342284 Points: 188 # Comments: 166</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/argoproj/argo-cd/releases/tag/stable" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Argo CD releases</span><span>14h ago</span></div>
+        <h2><a href="https://github.com/argoproj/argo-cd/releases/tag/stable" target="_blank" rel="noopener">stable</a></h2>
+        <p>Release 3.5.7</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/22842541cognition-devin-hierarchical-budgets/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>14h ago</span></div>
+        <h2><a href="https://thenewstack.io/22842541cognition-devin-hierarchical-budgets/" target="_blank" rel="noopener">Your AI coding agent now runs on a budget — and it can cut you off mid-task</a></h2>
+        <p>The days of pointing an AI agent at a backlog and letting it burn through compute without much oversight may The post Your AI coding agent now runs on a budget — and it can cut you off mid-task appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://terrytao.wordpress.com/2026/11/02/egoless-mathematics-in-the-ai-era/" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>14h ago</span></div>
+        <h2><a href="https://terrytao.wordpress.com/2026/11/02/egoless-mathematics-in-the-ai-era/" target="_blank" rel="noopener">Egoless Mathematics in the AI Era</a></h2>
+        <p>Article URL: https://terrytao.wordpress.com/2026/11/02/egoless-mathematics-in-the-ai-era/ Comments URL: https://news.ycombinator.com/item?id=50341736 Points: 159 # Comments: 117</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/canva-brush-design-editing/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>15h ago</span></div>
+        <h2><a href="https://thenewstack.io/canva-brush-design-editing/" target="_blank" rel="noopener">Canva’s new design model doesn’t generate images. It writes code to edit them.</a></h2>
+        <p>Australian graphic design software company Canva took the wraps off Canva Brush last week, its new vision-language model for designers. The post Canva’s new design model doesn’t</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/preparing-our-next-security-sprint-to-harden-openai" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>15h ago</span></div>
+        <h2><a href="https://openai.com/index/preparing-our-next-security-sprint-to-harden-openai" target="_blank" rel="noopener">Preparing our next security sprint to harden OpenAI</a></h2>
+        <p>OpenAI is preparing its next internal security sprint with Cathedral Systems to test and strengthen its defenses using AI.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/rewarding-defenders-with-bigger-bug-bounties" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>15h ago</span></div>
+        <h2><a href="https://openai.com/index/rewarding-defenders-with-bigger-bug-bounties" target="_blank" rel="noopener">Rewarding defenders with bigger bug bounties</a></h2>
+        <p>OpenAI is raising Security Bug Bounty rewards and introducing report quality, loyalty, and priority campaign bonuses for independent security researchers.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-october-2026/" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Google AI</span><span>16h ago</span></div>
+        <h2><a href="https://blog.google/innovation-and-ai/technology/ai/google-ai-updates-october-2026/" target="_blank" rel="noopener">The latest AI news we announced in October 2026</a></h2>
+        <p>Animated carousel of images from AI posts in October</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/openai-chatgpt-codex-shared-limits/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>17h ago</span></div>
+        <h2><a href="https://thenewstack.io/openai-chatgpt-codex-shared-limits/" target="_blank" rel="noopener">OpenAI’s new shared usage limit pits ChatGPT against Codex</a></h2>
+        <p>OpenAI has revealed plans to combine usage allowances across ChatGPT and Codex, as part of a broader effort to integrate The post</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://www.businessinsider.com/anthropic-claude-internal-ai-use-exceeds-employee-pay-tokens-2026-11" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>17h ago</span></div>
+        <h2><a href="https://www.businessinsider.com/anthropic-claude-internal-ai-use-exceeds-employee-pay-tokens-2026-11" target="_blank" rel="noopener">Anthropic&#x27;s internal AI use, at retail prices, now exceeds its employee pay</a></h2>
+        <p>Article URL: https://www.businessinsider.com/anthropic-claude-internal-ai-use-exceeds-employee-pay-tokens-2026-11 Comments URL: https://news.ycombinator.com/item?id=50339494 Points: 323 # Comments: 248</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-02-security-risk-assessments-include-repository-protection-status" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>17h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-02-security-risk-assessments-include-repository-protection-status" target="_blank" rel="noopener">Security risk assessments include repository protection status</a></h2>
+        <p>The GitHub code security risk assessment and secret risk assessment now show whether findings are in protected or unprotected repositories, helping you identify where to extend your security coverage. Organization… The post Security risk assessments include repository protection...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/scaling-git-at-openai" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>18h ago</span></div>
+        <h2><a href="https://openai.com/index/scaling-git-at-openai" target="_blank" rel="noopener">Scaling Git at OpenAI</a></h2>
+        <p>How OpenAI built Pando, a Git-compatible backend designed for the scale of development that Codex makes possible.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-02-pull_request_target-blocked-by-default-december-2" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>18h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-02-pull_request_target-blocked-by-default-december-2" target="_blank" rel="noopener">pull_request_target blocked by default December 2</a></h2>
+        <p>Starting December 2, 2026, GitHub Actions will block pull_request_target events by default in all public repositories, unless an applicable Actions event policy explicitly allows them. Enforcement was previously scheduled for… The post pull_request_target blocked by default...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/grid-protectors-program" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>18h ago</span></div>
+        <h2><a href="https://openai.com/index/grid-protectors-program" target="_blank" rel="noopener">Introducing the Grid Protectors Program</a></h2>
+        <p>OpenAI’s Grid Protectors Program will work with utilities to help future compute campuses support grid reliability and protect consumer electricity costs.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://www.bloomberg.com/news/features/2026-09-17/san-francisco-s-ai-wealth-boom-skirts-engineers-as-openai-anthropic-ipos-near" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>19h ago</span></div>
+        <h2><a href="https://www.bloomberg.com/news/features/2026-09-17/san-francisco-s-ai-wealth-boom-skirts-engineers-as-openai-anthropic-ipos-near" target="_blank" rel="noopener">Jobless tech workers are being left out of San Francisco&#x27;s AI boom</a></h2>
+        <p>Article URL: https://www.bloomberg.com/news/features/2026-09-17/san-francisco-s-ai-wealth-boom-skirts-engineers-as-openai-anthropic-ipos-near Comments URL: https://news.ycombinator.com/item?id=50337454 Points: 174 # Comments: 247</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Containers" data-link="https://www.docker.com/blog/docker-blueprint-alliance-agent-baseline/" style="--h:200">
+        <div class="meta"><span class="cat">Containers</span><span>Docker Blog</span><span>19h ago</span></div>
+        <h2><a href="https://www.docker.com/blog/docker-blueprint-alliance-agent-baseline/" target="_blank" rel="noopener">The Ecosystem is the Answer: Docker, the Blueprint Alliance, and the Importance of Collaboration in the Agentic Era</a></h2>
+        <p>Docker is a founding member of the Blueprint Alliance, a 12-company reference architecture for securing AI agents, built around four governance questions.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Containers" data-link="https://www.docker.com/blog/docker-sandbox-code-checkout-workflows/" style="--h:200">
+        <div class="meta"><span class="cat">Containers</span><span>Docker Blog</span><span>19h ago</span></div>
+        <h2><a href="https://www.docker.com/blog/docker-sandbox-code-checkout-workflows/" target="_blank" rel="noopener">Where should your code live in a Docker Sandbox?</a></h2>
+        <p>Docker Sandboxes support three ways to organize an agent’s code: shared mounts, Git worktrees, and clone mode. Here’s how to choose between them.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://twitter.com/OcanaSantero/status/2115442964574908902" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>20h ago</span></div>
+        <h2><a href="https://twitter.com/OcanaSantero/status/2115442964574908902" target="_blank" rel="noopener">Last night an AI agent performed brain surgery on a mouse</a></h2>
+        <p>Article URL: https://twitter.com/OcanaSantero/status/2115442964574908902 Comments URL: https://news.ycombinator.com/item?id=50336138 Points: 131 # Comments: 103</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/blog/2026/11/02/the-linkerd-story-the-people-behind-the-service-mesh-a-new-documentary-premieres-at-kubecon-cloudnativecon-north-america-2026/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>21h ago</span></div>
+        <h2><a href="https://www.cncf.io/blog/2026/11/02/the-linkerd-story-the-people-behind-the-service-mesh-a-new-documentary-premieres-at-kubecon-cloudnativecon-north-america-2026/" target="_blank" rel="noopener">The Linkerd Story: The People Behind The Service Mesh — A new documentary premieres at KubeCon + CloudNativeCon North America 2026</a></h2>
+        <p>Join CNCF and Buoyant on November 9 in Salt Lake City for the premiere of a new documentary celebrating a decade of Linkerd, the evolution of service mesh technology, and the people who helped make it...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+  </main>
+</div>
+<script>
+  const KEY = "digest-read-links";
+  let read = new Set();
+  try { read = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...read])); } catch (e) {} };
+
+  const items = [...document.querySelectorAll(".item")];
+  const q = document.getElementById("q");
+  const hideRead = document.getElementById("hideRead");
+  let cat = "all";
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    for (const el of items) {
+      const isRead = read.has(el.dataset.link);
+      el.classList.toggle("read", isRead);
+      el.querySelector(".read-btn").textContent = isRead ? "Read" : "Mark as read";
+      const show = (cat === "all" || el.dataset.cat === cat)
+        && (!term || el.textContent.toLowerCase().includes(term))
+        && !(hideRead.checked && isRead);
+      el.classList.toggle("hidden", !show);
+    }
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    cat = chip.dataset.cat;
+    apply();
+  }));
+
+  for (const el of items) {
+    el.querySelector(".read-btn").addEventListener("click", () => {
+      const link = el.dataset.link;
+      read.has(link) ? read.delete(link) : read.add(link);
+      save(); apply();
+    });
+    el.querySelector("h2 a").addEventListener("click", () => { read.add(el.dataset.link); save(); apply(); });
+  }
+  q.addEventListener("input", apply);
+  hideRead.addEventListener("change", apply);
+  apply();
+</script>
+</body>
+</html>
