@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily reading list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fb; --surface: #ffffff; --ink: #1a2130; --muted: #5a6476;
+    --line: #dfe4ee; --l: 42%; --s: 62%;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121620; --surface: #1a1f2b; --ink: #e7eaf0; --muted: #9aa3b5;
+            --line: #2a3142; --l: 70%; --s: 70%; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
+  header .date { font-size: 1.15rem; font-weight: 500; margin: 0; }
+  header .sub { color: var(--muted); margin: 4px 0 28px; font-size: 0.95rem; }
+
+  .mix { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 3px; margin-bottom: 18px; }
+  .seg { background: hsl(var(--h) var(--s) var(--l)); min-width: 6px; }
+
+  .controls { position: sticky; top: 0; z-index: 2; background: var(--bg);
+              padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { font: inherit; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--h) var(--s) var(--l)); }
+  .chip b { font-weight: 600; color: var(--muted); }
+  .chip.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .chip:focus-visible, .read-btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid hsl(212 80% 55%); outline-offset: 2px; }
+  .tools { display: flex; gap: 10px; align-items: center; }
+  input[type=search] { flex: 1; font: inherit; padding: 8px 12px; border-radius: 8px;
+                       border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  label.hide { font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+
+  .item { position: relative; padding: 20px 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .item::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 4px;
+                  border-radius: 2px; background: hsl(var(--h) var(--s) var(--l)); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--muted); }
+  .meta .cat { color: hsl(var(--h) var(--s) var(--l)); font-weight: 600; }
+  .item h2 { font-size: 1.18rem; line-height: 1.35; margin: 4px 0 6px; font-weight: 600; }
+  .item h2 a { color: var(--ink); text-decoration: none; }
+  .item h2 a:hover { text-decoration: underline; text-decoration-color: hsl(var(--h) var(--s) var(--l)); text-underline-offset: 3px; }
+  .item p { margin: 0 0 8px; color: var(--muted); max-width: 68ch; }
+  .read-btn { font: inherit; font-size: 0.8rem; background: none; border: 0; padding: 0;
+              color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .item.read { opacity: 0.45; }
+  .item.read .read-btn::after { content: " (undo)"; }
+  .hidden { display: none; }
+  .empty { color: var(--muted); padding: 32px 0; }
+  @media (max-width: 520px) { header h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily reading list</h1>
+    <p class="date">Friday, 06 November 2026</p>
+    <p class="sub">25 stories from the last 24 hours, fetched 09:35 UTC</p>
+    <div class="mix" aria-hidden="true"><span class="seg" style="--h:46;flex:5"></span><span class="seg" style="--h:95;flex:5"></span><span class="seg" style="--h:4;flex:4"></span><span class="seg" style="--h:148;flex:3"></span><span class="seg" style="--h:335;flex:3"></span><span class="seg" style="--h:200;flex:3"></span><span class="seg" style="--h:182;flex:1"></span><span class="seg" style="--h:212;flex:1"></span></div>
+  </header>
+  <div class="controls">
+    <div class="chips"><button class="chip active" data-cat="all">All <b>25</b></button><button class="chip" data-cat="Industry" style="--h:46"><i></i>Industry <b>5</b></button><button class="chip" data-cat="Research" style="--h:95"><i></i>Research <b>5</b></button><button class="chip" data-cat="AI labs" style="--h:4"><i></i>AI labs <b>4</b></button><button class="chip" data-cat="CI/CD and tooling" style="--h:148"><i></i>CI/CD and tooling <b>3</b></button><button class="chip" data-cat="Community" style="--h:335"><i></i>Community <b>3</b></button><button class="chip" data-cat="Containers" style="--h:200"><i></i>Containers <b>3</b></button><button class="chip" data-cat="Cloud native" style="--h:182"><i></i>Cloud native <b>1</b></button><button class="chip" data-cat="Releases" style="--h:212"><i></i>Releases <b>1</b></button></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search titles and summaries" aria-label="Search">
+      <label class="hide"><input type="checkbox" id="hideRead"> Hide read</label>
+    </div>
+  </div>
+  <main id="list">
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.06962" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.06962" target="_blank" rel="noopener">Formalizing inverse problems in the age of AI: possibilities, pitfalls, and an invitation</a></h2>
+        <p>arXiv:2611.06962v1 Announce Type: new Abstract: Proof assistants such as Lean check mathematical proofs down to the axioms, and AI agents have recently made writing such proofs cheap. We describe AutoIP, a Lean library in which classical linear regularization theory, together...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.06972" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.06972" target="_blank" rel="noopener">KDASO: Knowledge-Data Dual-Driven Automated Skill Optimization for Liability Adjudication Tasks</a></h2>
+        <p>arXiv:2611.06972v1 Announce Type: new Abstract: Liability adjudication tasks (e.g., legal charge determination) require analyzing event descriptions against domain-specific skills to determine whether a party should bear liability. While Large Language Models (LLMs) have shown...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.06977" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.06977" target="_blank" rel="noopener">BlockLock: Reproducible LLM Inference with Fixed Batch Geometry</a></h2>
+        <p>arXiv:2611.06977v1 Announce Type: new Abstract: Reproducible LLM inference requires that a request produces the same output regardless of the other requests in the batch. Existing solutions pay for this in different ways: batch-invariant kernels constrain every operator, and...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.06984" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.06984" target="_blank" rel="noopener">Resource-Efficient Reinforcement Learning Post-Training through Elastic Expert Parallelism</a></h2>
+        <p>arXiv:2611.06984v1 Announce Type: new Abstract: Reinforcement learning post-training improves the capabilities of large language models, but generating training responses is a major computational bottleneck. In mixture-of-experts models, workers that finish their assigned...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.06989" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.06989" target="_blank" rel="noopener">The Two-Ledger Model: Transaction-Grain Cost Accounting for Multi-Agent AI Systems Across Clouds, Models, and Systems of Record</a></h2>
+        <p>arXiv:2611.06989v1 Announce Type: new Abstract: Enterprises run business transactions through multi-agent AI systems spanning clouds, large language models (LLMs), orchestration harnesses, and systems of record. Finance receives AI cost only at settlement grain, aggregated by...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Releases" data-link="https://github.com/kubernetes/kubernetes/releases/tag/v1.38.0-beta.0" style="--h:212">
+        <div class="meta"><span class="cat">Releases</span><span>Kubernetes releases</span><span>5h ago</span></div>
+        <h2><a href="https://github.com/kubernetes/kubernetes/releases/tag/v1.38.0-beta.0" target="_blank" rel="noopener">v1.38.0-beta.0</a></h2>
+        <p>See kubernetes-announce@ . Additional binary downloads are linked in the CHANGELOG . See the CHANGELOG for more details.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Containers" data-link="https://www.docker.com/blog/docker-sandboxes-vs-containers/" style="--h:200">
+        <div class="meta"><span class="cat">Containers</span><span>Docker Blog</span><span>6h ago</span></div>
+        <h2><a href="https://www.docker.com/blog/docker-sandboxes-vs-containers/" target="_blank" rel="noopener">Docker Sandboxes vs. Containers: Choosing the Right Isolation for AI Agents</a></h2>
+        <p>A container shares the host kernel. Docker Sandboxes are microVMs with their own kernel and private Docker Engine. See how they differ and when to use each.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://github.com/dsx-ai-factory/nvke" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (Kubernetes, 50+ points)</span><span>6h ago</span></div>
+        <h2><a href="https://github.com/dsx-ai-factory/nvke" target="_blank" rel="noopener">Nvidia Kubernetes Engine (NVKE)</a></h2>
+        <p>Article URL: https://github.com/dsx-ai-factory/nvke Comments URL: https://news.ycombinator.com/item?id=50387738 Points: 74 # Comments: 19</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-05-usage-metrics-api-adds-code-review-details-and-addressed-rate" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>9h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-05-usage-metrics-api-adds-code-review-details-and-addressed-rate" target="_blank" rel="noopener">Usage metrics API adds code review details and addressed rate</a></h2>
+        <p>The enterprise and organization repository-level Copilot usage metrics reports now show what happens to Copilot code review feedback. A new copilot_code_review object on each repos-1-day row reports how many Copilot-reviewed… The post Usage metrics API adds code review details...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-05-usage-metrics-api-flags-telemetry-and-version-gaps" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>9h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-05-usage-metrics-api-flags-telemetry-and-version-gaps" target="_blank" rel="noopener">Usage metrics API flags telemetry and version gaps</a></h2>
+        <p>The Copilot usage metrics API now shows which users are missing client telemetry or are running IDE or extension versions below the usage metrics minimums. New per-user fields appear in… The post Usage metrics API flags telemetry and version gaps appeared first on The GitHub...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://finance.yahoo.com/technology/ai/articles/mark-cuban-says-facebook-knowingly-213000020.html" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>10h ago</span></div>
+        <h2><a href="https://finance.yahoo.com/technology/ai/articles/mark-cuban-says-facebook-knowingly-213000020.html" target="_blank" rel="noopener">Cuban: Facebook knowingly runs AI deepfake scam ads; docs say $16B fraud revenue</a></h2>
+        <p>Article URL: https://finance.yahoo.com/technology/ai/articles/mark-cuban-says-facebook-knowingly-213000020.html Comments URL: https://news.ycombinator.com/item?id=50385870 Points: 318 # Comments: 152</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/factory-acquires-humanlayer-agents/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>13h ago</span></div>
+        <h2><a href="https://thenewstack.io/factory-acquires-humanlayer-agents/" target="_blank" rel="noopener">HumanLayer just got acquired by Factory. But it gave users a way out first.</a></h2>
+        <p>Factory has acquired HumanLayer, its third AI coding startup in less than a month, as it works to fold more The post HumanLayer just got acquired by Factory. But it gave users a way out first. appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/cultfit-builds-with-codex" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>13h ago</span></div>
+        <h2><a href="https://openai.com/index/cultfit-builds-with-codex" target="_blank" rel="noopener">Cult.fit builds operational muscle with Codex</a></h2>
+        <p>Cult.fit is using Codex to help teams across functions build tools, move faster, and change how work gets done.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/nvidia/cosmos-interactive-world-simulation" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>14h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/nvidia/cosmos-interactive-world-simulation" target="_blank" rel="noopener">New NVIDIA Cosmos 3 Open Models for Interactive World Simulation</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/openai-gpt6-cyber-exploits/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>14h ago</span></div>
+        <h2><a href="https://thenewstack.io/openai-gpt6-cyber-exploits/" target="_blank" rel="noopener">OpenAI’s new GPT-6 Cyber is better at hacking and better at staying in its lane</a></h2>
+        <p>OpenAI on Thursday launched GPT-6 Cyber, the latest release in its series of cybersecurity-focused models. The company ranks GPT-6 Cyber’s ability The post OpenAI’s new GPT-6 Cyber is better at hacking and better at staying in its lane appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/together-compiler-gpu-optimization/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>14h ago</span></div>
+        <h2><a href="https://thenewstack.io/together-compiler-gpu-optimization/" target="_blank" rel="noopener">Together AI let coding agents rewrite its GPU code. Then it kept humans on the deploy button.</a></h2>
+        <p>Together AI is putting AI coding agents to work on the GPU code that runs its inference infrastructure, automating performance The post Together AI let coding agents rewrite its GPU code. Then it kept humans on the</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://www.wsj.com/livecoverage/stock-market-today-dow-sp-500-nasdaq-11-05-2026" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>15h ago</span></div>
+        <h2><a href="https://www.wsj.com/livecoverage/stock-market-today-dow-sp-500-nasdaq-11-05-2026" target="_blank" rel="noopener">Nasdaq Sinks 5% as Investors Retreat from AI Trade After Election</a></h2>
+        <p>Article URL: https://www.wsj.com/livecoverage/stock-market-today-dow-sp-500-nasdaq-11-05-2026 Comments URL: https://news.ycombinator.com/item?id=50382179 Points: 160 # Comments: 190</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/raindrop-simulations-ai-agents/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>15h ago</span></div>
+        <h2><a href="https://thenewstack.io/raindrop-simulations-ai-agents/" target="_blank" rel="noopener">Raindrop simulates your agent’s world to catch what your changes break</a></h2>
+        <p>Raindrop wants developers to know what else will change when they edit an agent’s prompt, swap its model, or give The post Raindrop simulates your agent’s world to catch what your changes break appeared first on The</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/groundcover-autonomous-kubernetes-rightsizing/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>16h ago</span></div>
+        <h2><a href="https://thenewstack.io/groundcover-autonomous-kubernetes-rightsizing/" target="_blank" rel="noopener">Groundcover automates Kubernetes sizing. Engineers set the bounds.</a></h2>
+        <p>On Tuesday, groundcover launched Autonomous Infrastructure in beta to continuously adjust CPU and memory requests for Kubernetes (K8s) Deployments based The post</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/australian-universities-ai-native-graduates" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>16h ago</span></div>
+        <h2><a href="https://openai.com/index/australian-universities-ai-native-graduates" target="_blank" rel="noopener">Australian universities are creating AI-native graduates</a></h2>
+        <p>Australian universities are expanding access to ChatGPT and bringing AI into teaching and learning to prepare students for an AI-enabled workforce.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Google AI</span><span>16h ago</span></div>
+        <h2><a href="https://blog.google/innovation-and-ai/technology/developers-tools/introducing-gemini-omni-1-2-flash/" target="_blank" rel="noopener">Gemini Omni 1.2 Flash: Fast and cost-effective with longer clips</a></h2>
+        <p>Text &quot;Gemini Introducing Gemini Omni 1.2 Flash&quot; surroudned by images of a beehive, animals in conversation, a squid, and a woman walking down a street</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-05-secret-scanning-upgrades-detectors-adds-spacex-as-partner" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>17h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-05-secret-scanning-upgrades-detectors-adds-spacex-as-partner" target="_blank" rel="noopener">Secret scanning upgrades detectors, adds SpaceX as partner</a></h2>
+        <p>This update expands secret scanning’s detection coverage: New partner: SpaceX is now a secret scanning partner. New detector: GitHub now detects starlink_public_api_v2_secret. Upgraded detectors: Alibaba, AWS, Google, OpenVSX, Pydantic Services,… The post Secret scanning...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Containers" data-link="https://www.docker.com/blog/docker-activestate-trusted-content/" style="--h:200">
+        <div class="meta"><span class="cat">Containers</span><span>Docker Blog</span><span>18h ago</span></div>
+        <h2><a href="https://www.docker.com/blog/docker-activestate-trusted-content/" target="_blank" rel="noopener">Docker and ActiveState Extending Secure Defaults to the Packages Developers Install</a></h2>
+        <p>Docker partners with ActiveState to continue to provide one standard for trusted content across everything you and your teams build on.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Containers" data-link="https://www.docker.com/blog/cncf-score-project-improved-its-security-posture-by-joining-the-docker-sponsored-open-source-program/" style="--h:200">
+        <div class="meta"><span class="cat">Containers</span><span>Docker Blog</span><span>19h ago</span></div>
+        <h2><a href="https://www.docker.com/blog/cncf-score-project-improved-its-security-posture-by-joining-the-docker-sponsored-open-source-program/" target="_blank" rel="noopener">CNCF Score project improved its security posture by joining the Docker-Sponsored Open Source Program</a></h2>
+        <p>See how CNCF Score improved container security with Docker Scout, Hardened Images, and the Docker-Sponsored Open Source Program.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/blog/2026/11/05/kpt-v1-0-0-is-released/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>21h ago</span></div>
+        <h2><a href="https://www.cncf.io/blog/2026/11/05/kpt-v1-0-0-is-released/" target="_blank" rel="noopener">kpt v1.0.0 is released</a></h2>
+        <p>After many years and much development, the kpt community has released v1.0.0 of the kpt toolchain. This is a big step in maturing the kpt project after having it in pre-release status for several years. In...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+  </main>
+</div>
+<script>
+  const KEY = "digest-read-links";
+  let read = new Set();
+  try { read = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...read])); } catch (e) {} };
+
+  const items = [...document.querySelectorAll(".item")];
+  const q = document.getElementById("q");
+  const hideRead = document.getElementById("hideRead");
+  let cat = "all";
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    for (const el of items) {
+      const isRead = read.has(el.dataset.link);
+      el.classList.toggle("read", isRead);
+      el.querySelector(".read-btn").textContent = isRead ? "Read" : "Mark as read";
+      const show = (cat === "all" || el.dataset.cat === cat)
+        && (!term || el.textContent.toLowerCase().includes(term))
+        && !(hideRead.checked && isRead);
+      el.classList.toggle("hidden", !show);
+    }
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    cat = chip.dataset.cat;
+    apply();
+  }));
+
+  for (const el of items) {
+    el.querySelector(".read-btn").addEventListener("click", () => {
+      const link = el.dataset.link;
+      read.has(link) ? read.delete(link) : read.add(link);
+      save(); apply();
+    });
+    el.querySelector("h2 a").addEventListener("click", () => { read.add(el.dataset.link); save(); apply(); });
+  }
+  q.addEventListener("input", apply);
+  hideRead.addEventListener("change", apply);
+  apply();
+</script>
+</body>
+</html>
