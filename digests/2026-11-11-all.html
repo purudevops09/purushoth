@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily reading list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fb; --surface: #ffffff; --ink: #1a2130; --muted: #5a6476;
+    --line: #dfe4ee; --l: 42%; --s: 62%;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121620; --surface: #1a1f2b; --ink: #e7eaf0; --muted: #9aa3b5;
+            --line: #2a3142; --l: 70%; --s: 70%; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
+  header .date { font-size: 1.15rem; font-weight: 500; margin: 0; }
+  header .sub { color: var(--muted); margin: 4px 0 28px; font-size: 0.95rem; }
+
+  .mix { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 3px; margin-bottom: 18px; }
+  .seg { background: hsl(var(--h) var(--s) var(--l)); min-width: 6px; }
+
+  .controls { position: sticky; top: 0; z-index: 2; background: var(--bg);
+              padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { font: inherit; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--h) var(--s) var(--l)); }
+  .chip b { font-weight: 600; color: var(--muted); }
+  .chip.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .chip:focus-visible, .read-btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid hsl(212 80% 55%); outline-offset: 2px; }
+  .tools { display: flex; gap: 10px; align-items: center; }
+  input[type=search] { flex: 1; font: inherit; padding: 8px 12px; border-radius: 8px;
+                       border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  label.hide { font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+
+  .item { position: relative; padding: 20px 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .item::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 4px;
+                  border-radius: 2px; background: hsl(var(--h) var(--s) var(--l)); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--muted); }
+  .meta .cat { color: hsl(var(--h) var(--s) var(--l)); font-weight: 600; }
+  .item h2 { font-size: 1.18rem; line-height: 1.35; margin: 4px 0 6px; font-weight: 600; }
+  .item h2 a { color: var(--ink); text-decoration: none; }
+  .item h2 a:hover { text-decoration: underline; text-decoration-color: hsl(var(--h) var(--s) var(--l)); text-underline-offset: 3px; }
+  .item p { margin: 0 0 8px; color: var(--muted); max-width: 68ch; }
+  .read-btn { font: inherit; font-size: 0.8rem; background: none; border: 0; padding: 0;
+              color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .item.read { opacity: 0.45; }
+  .item.read .read-btn::after { content: " (undo)"; }
+  .hidden { display: none; }
+  .empty { color: var(--muted); padding: 32px 0; }
+  @media (max-width: 520px) { header h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily reading list</h1>
+    <p class="date">Wednesday, 11 November 2026</p>
+    <p class="sub">30 stories from the last 24 hours, fetched 09:39 UTC</p>
+    <div class="mix" aria-hidden="true"><span class="seg" style="--h:4;flex:9"></span><span class="seg" style="--h:148;flex:5"></span><span class="seg" style="--h:182;flex:5"></span><span class="seg" style="--h:95;flex:5"></span><span class="seg" style="--h:46;flex:4"></span><span class="seg" style="--h:335;flex:2"></span></div>
+  </header>
+  <div class="controls">
+    <div class="chips"><button class="chip active" data-cat="all">All <b>30</b></button><button class="chip" data-cat="AI labs" style="--h:4"><i></i>AI labs <b>9</b></button><button class="chip" data-cat="CI/CD and tooling" style="--h:148"><i></i>CI/CD and tooling <b>5</b></button><button class="chip" data-cat="Cloud native" style="--h:182"><i></i>Cloud native <b>5</b></button><button class="chip" data-cat="Research" style="--h:95"><i></i>Research <b>5</b></button><button class="chip" data-cat="Industry" style="--h:46"><i></i>Industry <b>4</b></button><button class="chip" data-cat="Community" style="--h:335"><i></i>Community <b>2</b></button></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search titles and summaries" aria-label="Search">
+      <label class="hide"><input type="checkbox" id="hideRead"> Hide read</label>
+    </div>
+  </div>
+  <main id="list">
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/gilbert-tobin-sam-nickless" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>just now</span></div>
+        <h2><a href="https://openai.com/index/gilbert-tobin-sam-nickless" target="_blank" rel="noopener">Gilbert + Tobin rethinks the business of law with AI</a></h2>
+        <p>A conversation with Sam Nickless, Partner and Chief Executive Officer at Gilbert + Tobin.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://blog.google/company-news/outreach-and-initiatives/arts-culture/esther-mahlangu/" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Google AI</span><span>just now</span></div>
+        <h2><a href="https://blog.google/company-news/outreach-and-initiatives/arts-culture/esther-mahlangu/" target="_blank" rel="noopener">Experience the art and legacy of Dr. Esther Mahlangu</a></h2>
+        <p>A portrait of Dr Nontobeko Ntombela, Senior Lecturer, Department of Curatorial, Public and Visual Cultures, Wits School of Arts, University of the Witwatersrand</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/chatgpt-plus-for-veterans" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>1h ago</span></div>
+        <h2><a href="https://openai.com/index/chatgpt-plus-for-veterans" target="_blank" rel="noopener">ChatGPT Plus for veterans and servicemembers</a></h2>
+        <p>More than 20,000 veterans and transitioning service members have claimed a free year of ChatGPT Plus. See how they use it to prepare for civilian careers.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://huggingface.co/blog/qvac/botpsy" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Hugging Face</span><span>4h ago</span></div>
+        <h2><a href="https://huggingface.co/blog/qvac/botpsy" target="_blank" rel="noopener">BotPsy: On-Device Personal Assistant with a Sub-Billion-Parameter Agentic Language Model</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.12933" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.12933" target="_blank" rel="noopener">Auditable Human-Agent Teams for Autonomous X-ray Experimentation</a></h2>
+        <p>arXiv:2611.12933v1 Announce Type: new Abstract: Closed-loop autonomous experimentation can accelerate scientific discovery, but implementation effort limits accessibility. Agentic systems may lower this barrier, although sustained operation on physical instruments remains...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.12934" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.12934" target="_blank" rel="noopener">EarthRecord: From Pixels to Land Change with Multimodal Agents over Four Decades of Satellite Imagery</a></h2>
+        <p>arXiv:2611.12934v1 Announce Type: new Abstract: While multimodal agents now carry out complex data analysis with tools, their ability to turn decades of satellite imagery into reliable land-change analysis, crucial for Earth observation science, remains unmeasured. Existing...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.12935" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.12935" target="_blank" rel="noopener">Train on prefill, monitor at decode: Using sparse autoencoders for topic monitoring</a></h2>
+        <p>arXiv:2611.12935v1 Announce Type: new Abstract: Topic monitoring is the task of labelling the topic of each token in a model&#x27;s response during generation. Activation-based monitors that run at generation time have so far been trained to detect harmful content and are limited to...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.12936" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.12936" target="_blank" rel="noopener">LandslideFM: A Foundation Model Towards Unified Landslide Perception and Understanding</a></h2>
+        <p>arXiv:2611.12936v1 Announce Type: new Abstract: Intelligent landslide detection is essential for disaster prevention. However, existing models primarily focus on isolated visual tasks, require extensive labeled data, and lack deep analytical and scene-understanding capabilities....</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.12937" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>4h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.12937" target="_blank" rel="noopener">Tracing Psychometric Inference in Large Language Models</a></h2>
+        <p>arXiv:2611.12937v1 Announce Type: new Abstract: Do large language models represent psychological constructs internally, or do they only generate outputs that resemble psychometric structure? We address this question using a cross-persona paradigm across 14 model variants from...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-10-github-app-support-for-enterprise-copilot-seat-management" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>9h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-10-github-app-support-for-enterprise-copilot-seat-management" target="_blank" rel="noopener">GitHub App support for Enterprise Copilot seat management</a></h2>
+        <p>Enterprise GitHub Apps can now call the enterprise-level Copilot seat management APIs to control which users and enterprise teams are assigned Copilot seats. The Copilot seat management APIs are accessible… The post GitHub App support for Enterprise Copilot seat management...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://9to5mac.com/2026/11/10/apple-has-new-mac-app-coming-to-make-running-local-ai-models-easy/" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>12h ago</span></div>
+        <h2><a href="https://9to5mac.com/2026/11/10/apple-has-new-mac-app-coming-to-make-running-local-ai-models-easy/" target="_blank" rel="noopener">Apple has new Mac app coming to make running local AI models easy</a></h2>
+        <p>Article URL: https://9to5mac.com/2026/11/10/apple-has-new-mac-app-coming-to-make-running-local-ai-models-easy/ Comments URL: https://news.ycombinator.com/item?id=50446520 Points: 228 # Comments: 188</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/claude-enterprise-apps-connectors/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>13h ago</span></div>
+        <h2><a href="https://thenewstack.io/claude-enterprise-apps-connectors/" target="_blank" rel="noopener">Anthropic wants Claude to be the front end for your entire enterprise app stack</a></h2>
+        <p>Anthropic is expanding Claude’s ability to work directly inside enterprise applications; it can now open full software interfaces, retri</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-10-gemini-4-carbon-in-github-copilot" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>14h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-10-gemini-4-carbon-in-github-copilot" target="_blank" rel="noopener">Gemini 4 Carbon in GitHub Copilot</a></h2>
+        <p>Gemini 4 Carbon, Google’s latest model, is now generally available in GitHub Copilot. It is designed for complex coding, agentic, and reasoning tasks, with a focus on secure code generation… The post Gemini 4 Carbon in GitHub Copilot appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://blog.google/products-and-platforms/platforms/android/gemini-intelligence-november-features-devices/" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Google AI</span><span>14h ago</span></div>
+        <h2><a href="https://blog.google/products-and-platforms/platforms/android/gemini-intelligence-november-features-devices/" target="_blank" rel="noopener">Gemini Intelligence: New features, on more devices</a></h2>
+        <p>A man speaks into a phone. Text on the screen reads &#x27;Gemini Intelligence&#x27;</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-10-c-language-server-now-auto-configures-msbuild-builds" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>16h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-10-c-language-server-now-auto-configures-msbuild-builds" target="_blank" rel="noopener">C++ language server now auto-configures MSBuild builds</a></h2>
+        <p>The Microsoft C++ Language Server for GitHub Copilot CLI now bundles its MSBuild compile commands extractor and invokes it automatically. An agent no longer needs to discover and run a… The post C++ language server now auto-configures MSBuild builds appeared first on The GitHub...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/gemini-4-carbon-swarm/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>17h ago</span></div>
+        <h2><a href="https://thenewstack.io/gemini-4-carbon-swarm/" target="_blank" rel="noopener">Google says Gemini 4 Carbon proved Signal’s encryption in weeks</a></h2>
+        <p>Google released Gemini 4 Carbon to paying developers Tuesday, positioning its newest frontier model above Gemini 4 Argon for complex The post Google says Gemini 4 Carbon proved Signal’s encryption in weeks appeared first on</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/announcements/2026/11/10/cncf-welcomes-twelve-new-members-as-organizations-look-to-run-ai-agents-on-open-sovereign-infrastructure/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>17h ago</span></div>
+        <h2><a href="https://www.cncf.io/announcements/2026/11/10/cncf-welcomes-twelve-new-members-as-organizations-look-to-run-ai-agents-on-open-sovereign-infrastructure/" target="_blank" rel="noopener">CNCF Welcomes Twelve New Members as Organizations Look to Run AI Agents on Open, Sovereign Infrastructure</a></h2>
+        <p>Organizations join the cloud native community to strengthen security, visibility, and control for production AI Key Highlights KUBECON + CLOUDNATIVECON NORTH AMERICA, SALT LAKE CITY – November 10, 2026 – The Cloud Native Computing Foundation® (CNCF®),...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/announcements/2026/11/10/cncf-welcomes-coreweave-as-a-platinum-member-to-further-open-source-ai-infrastructure/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>17h ago</span></div>
+        <h2><a href="https://www.cncf.io/announcements/2026/11/10/cncf-welcomes-coreweave-as-a-platinum-member-to-further-open-source-ai-infrastructure/" target="_blank" rel="noopener">CNCF Welcomes CoreWeave as a Platinum Member to Further Open Source AI Infrastructure</a></h2>
+        <p>Investment underscores CoreWeave’s continued push to build open, cloud native infrastructure for production AI at scale Key Highlights SAN FRANCISCO — November 10, 2026 — The Cloud Native Computing Foundation® (CNCF®), which builds sustainable ecosystems for...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/blog/2026/11/10/open-cluster-management-ocm-becomes-a-cncf-incubating-project/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>17h ago</span></div>
+        <h2><a href="https://www.cncf.io/blog/2026/11/10/open-cluster-management-ocm-becomes-a-cncf-incubating-project/" target="_blank" rel="noopener">Open Cluster Management (OCM) becomes a CNCF Incubating Project</a></h2>
+        <p>The CNCF Technical Oversight Committee (TOC) voted to accept Open Cluster Management as a CNCF incubating project. Open Cluster Management is an open source project that simplifies the management of Kubernetes clusters across cloud, on-premises, and...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/announcements/2026/11/10/cncf-welcomes-vultr-as-a-platinum-member-to-advance-open-and-sovereign-cloud-infrastructure-for-ai/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>17h ago</span></div>
+        <h2><a href="https://www.cncf.io/announcements/2026/11/10/cncf-welcomes-vultr-as-a-platinum-member-to-advance-open-and-sovereign-cloud-infrastructure-for-ai/" target="_blank" rel="noopener">CNCF Welcomes Vultr as a Platinum Member to Advance Open and Sovereign Cloud Infrastructure for AI</a></h2>
+        <p>Upgrade extends Vultr’s 5-year history with CNCF and expands its voice in shaping open interoperability for AI factory infrastructure at global scale Key Highlights KUBECON + CLOUDNATIVECON NORTH AMERICA, SALT LAKE CITY – November 10, 2026–...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud native" data-link="https://www.cncf.io/announcements/2026/11/10/cncf-and-slashdata-report-finds-cloud-native-developers-are-more-ai-ready-global-population-surpasses-21-million/" style="--h:182">
+        <div class="meta"><span class="cat">Cloud native</span><span>CNCF Blog</span><span>17h ago</span></div>
+        <h2><a href="https://www.cncf.io/announcements/2026/11/10/cncf-and-slashdata-report-finds-cloud-native-developers-are-more-ai-ready-global-population-surpasses-21-million/" target="_blank" rel="noopener">CNCF and SlashData Report Finds Cloud Native Developers Are More AI-Ready, Global Population Surpasses 21 Million</a></h2>
+        <p>New research released finds 75% of cloud native developers use AI coding tools, compared to 55% of non-cloud native developer peers Key Highlights: SALT LAKE CITY – KubeCon + CloudNativeCon North America – Nov. 10, 2026...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/grok-api-watermarking-default/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>17h ago</span></div>
+        <h2><a href="https://thenewstack.io/grok-api-watermarking-default/" target="_blank" rel="noopener">SpaceXSI quietly flips Grok API text watermarking to off by default</a></h2>
+        <p>The thorny issue of watermarking AI-generated text took an interesting turn this past week, with SpaceXSI seemingly U-turning on plans The post SpaceXSI quietly flips Grok API text watermarking to off by default a</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/cncf-developer-ai-adoption/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>17h ago</span></div>
+        <h2><a href="https://thenewstack.io/cncf-developer-ai-adoption/" target="_blank" rel="noopener">New CNCF report: 75% of cloud-native developers ship code with AI. Jonathan Bryce explains why.</a></h2>
+        
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-10-dependabot-alerts-will-pause-on-inactive-repositories" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>19h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-10-dependabot-alerts-will-pause-on-inactive-repositories" target="_blank" rel="noopener">Dependabot alerts will pause on inactive repositories</a></h2>
+        <p>Starting December 8, 2026, GitHub will turn off Dependabot alerts on most repositories with no activity in the past year. Their existing alerts are archived, not deleted, and you can… The post Dependabot alerts will pause on inactive repositories appeared first on The GitHub...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://blog.google/company-news/inside-google/company-announcements/adobe-google-partnership-integration/" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Google AI</span><span>19h ago</span></div>
+        <h2><a href="https://blog.google/company-news/inside-google/company-announcements/adobe-google-partnership-integration/" target="_blank" rel="noopener">We’re bringing Adobe’s creative and productivity tools closer to your everyday Google apps.</a></h2>
+        <p>Google and Adobe are integrating creative and productivity tools. Edit PDFs in Drive and use Adobe AI in Gemini. See what’s new in this partnership.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/gemini-for-healthcare/" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Google AI</span><span>20h ago</span></div>
+        <h2><a href="https://blog.google/innovation-and-ai/infrastructure-and-cloud/google-cloud/gemini-for-healthcare/" target="_blank" rel="noopener">Google Cloud launches Gemini for healthcare.</a></h2>
+        <p>Google Cloud launches Gemini for healthcare to unify clinical data and automate workflows. Reduce administrative burnout. See how it works.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/helping-caregivers-use-ai-in-everyday-life" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>21h ago</span></div>
+        <h2><a href="https://openai.com/index/helping-caregivers-use-ai-in-everyday-life" target="_blank" rel="noopener">Helping caregivers use AI in everyday life</a></h2>
+        <p>OpenAI Academy is bringing free, hands-on ChatGPT workshops to caregivers in five U.S. cities, helping them build practical AI skills for everyday life.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-10-a-more-informative-github-dashboard" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>23h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-10-a-more-informative-github-dashboard" target="_blank" rel="noopener">A more informative GitHub dashboard</a></h2>
+        <p>Since the new dashboard experience became the default, we’ve heard from developers that it used too much space to show too little. Generous padding, wrapped titles, and a low default… The post A more informative GitHub dashboard appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Community" data-link="https://evanxmerz.com/post/ai-usage-generates-a-fragile-codebase/" style="--h:335">
+        <div class="meta"><span class="cat">Community</span><span>Hacker News (AI, 100+ points)</span><span>23h ago</span></div>
+        <h2><a href="https://evanxmerz.com/post/ai-usage-generates-a-fragile-codebase/" target="_blank" rel="noopener">AI usage generates a fragile codebase</a></h2>
+        <p>Article URL: https://evanxmerz.com/post/ai-usage-generates-a-fragile-codebase/ Comments URL: https://news.ycombinator.com/item?id=50438318 Points: 536 # Comments: 513</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/introducing-businesses-chatgpt" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>23h ago</span></div>
+        <h2><a href="https://openai.com/index/introducing-businesses-chatgpt" target="_blank" rel="noopener">Introducing Businesses in ChatGPT</a></h2>
+        <p>Manage your business information, get insights about how your business shows up, and turn interest into action in ChatGPT.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+  </main>
+</div>
+<script>
+  const KEY = "digest-read-links";
+  let read = new Set();
+  try { read = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...read])); } catch (e) {} };
+
+  const items = [...document.querySelectorAll(".item")];
+  const q = document.getElementById("q");
+  const hideRead = document.getElementById("hideRead");
+  let cat = "all";
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    for (const el of items) {
+      const isRead = read.has(el.dataset.link);
+      el.classList.toggle("read", isRead);
+      el.querySelector(".read-btn").textContent = isRead ? "Read" : "Mark as read";
+      const show = (cat === "all" || el.dataset.cat === cat)
+        && (!term || el.textContent.toLowerCase().includes(term))
+        && !(hideRead.checked && isRead);
+      el.classList.toggle("hidden", !show);
+    }
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    cat = chip.dataset.cat;
+    apply();
+  }));
+
+  for (const el of items) {
+    el.querySelector(".read-btn").addEventListener("click", () => {
+      const link = el.dataset.link;
+      read.has(link) ? read.delete(link) : read.add(link);
+      save(); apply();
+    });
+    el.querySelector("h2 a").addEventListener("click", () => { read.add(el.dataset.link); save(); apply(); });
+  }
+  q.addEventListener("input", apply);
+  hideRead.addEventListener("change", apply);
+  apply();
+</script>
+</body>
+</html>
