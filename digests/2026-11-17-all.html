@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Daily reading list</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f5f7fb; --surface: #ffffff; --ink: #1a2130; --muted: #5a6476;
+    --line: #dfe4ee; --l: 42%; --s: 62%;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #121620; --surface: #1a1f2b; --ink: #e7eaf0; --muted: #9aa3b5;
+            --line: #2a3142; --l: 70%; --s: 70%; color-scheme: dark; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink);
+         font: 16px/1.6 "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 48px 20px 80px; }
+
+  header h1 { font-size: 2.6rem; line-height: 1.1; margin: 0 0 6px; font-weight: 700; letter-spacing: -0.02em; }
+  header .date { font-size: 1.15rem; font-weight: 500; margin: 0; }
+  header .sub { color: var(--muted); margin: 4px 0 28px; font-size: 0.95rem; }
+
+  .mix { display: flex; height: 14px; border-radius: 7px; overflow: hidden; gap: 3px; margin-bottom: 18px; }
+  .seg { background: hsl(var(--h) var(--s) var(--l)); min-width: 6px; }
+
+  .controls { position: sticky; top: 0; z-index: 2; background: var(--bg);
+              padding: 12px 0; border-bottom: 1px solid var(--line); margin-bottom: 8px; }
+  .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .chip { font: inherit; font-size: 0.85rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
+          padding: 4px 12px; border-radius: 999px; border: 1px solid var(--line);
+          background: var(--surface); color: var(--ink); }
+  .chip i { width: 9px; height: 9px; border-radius: 50%; background: hsl(var(--h) var(--s) var(--l)); }
+  .chip b { font-weight: 600; color: var(--muted); }
+  .chip.active { border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+  .chip:focus-visible, .read-btn:focus-visible, a:focus-visible, input:focus-visible { outline: 2px solid hsl(212 80% 55%); outline-offset: 2px; }
+  .tools { display: flex; gap: 10px; align-items: center; }
+  input[type=search] { flex: 1; font: inherit; padding: 8px 12px; border-radius: 8px;
+                       border: 1px solid var(--line); background: var(--surface); color: var(--ink); }
+  label.hide { font-size: 0.85rem; color: var(--muted); display: flex; gap: 6px; align-items: center; white-space: nowrap; }
+
+  .item { position: relative; padding: 20px 0 20px 20px; border-bottom: 1px solid var(--line); }
+  .item::before { content: ""; position: absolute; left: 0; top: 22px; bottom: 22px; width: 4px;
+                  border-radius: 2px; background: hsl(var(--h) var(--s) var(--l)); }
+  .meta { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 0.82rem; color: var(--muted); }
+  .meta .cat { color: hsl(var(--h) var(--s) var(--l)); font-weight: 600; }
+  .item h2 { font-size: 1.18rem; line-height: 1.35; margin: 4px 0 6px; font-weight: 600; }
+  .item h2 a { color: var(--ink); text-decoration: none; }
+  .item h2 a:hover { text-decoration: underline; text-decoration-color: hsl(var(--h) var(--s) var(--l)); text-underline-offset: 3px; }
+  .item p { margin: 0 0 8px; color: var(--muted); max-width: 68ch; }
+  .read-btn { font: inherit; font-size: 0.8rem; background: none; border: 0; padding: 0;
+              color: var(--muted); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+  .item.read { opacity: 0.45; }
+  .item.read .read-btn::after { content: " (undo)"; }
+  .hidden { display: none; }
+  .empty { color: var(--muted); padding: 32px 0; }
+  @media (max-width: 520px) { header h1 { font-size: 2rem; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>Daily reading list</h1>
+    <p class="date">Tuesday, 17 November 2026</p>
+    <p class="sub">24 stories from the last 24 hours, fetched 10:54 UTC</p>
+    <div class="mix" aria-hidden="true"><span class="seg" style="--h:4;flex:5"></span><span class="seg" style="--h:148;flex:5"></span><span class="seg" style="--h:95;flex:5"></span><span class="seg" style="--h:46;flex:4"></span><span class="seg" style="--h:28;flex:3"></span><span class="seg" style="--h:200;flex:1"></span><span class="seg" style="--h:250;flex:1"></span></div>
+  </header>
+  <div class="controls">
+    <div class="chips"><button class="chip active" data-cat="all">All <b>24</b></button><button class="chip" data-cat="AI labs" style="--h:4"><i></i>AI labs <b>5</b></button><button class="chip" data-cat="CI/CD and tooling" style="--h:148"><i></i>CI/CD and tooling <b>5</b></button><button class="chip" data-cat="Research" style="--h:95"><i></i>Research <b>5</b></button><button class="chip" data-cat="Industry" style="--h:46"><i></i>Industry <b>4</b></button><button class="chip" data-cat="Cloud" style="--h:28"><i></i>Cloud <b>3</b></button><button class="chip" data-cat="Containers" style="--h:200"><i></i>Containers <b>1</b></button><button class="chip" data-cat="Kubernetes" style="--h:250"><i></i>Kubernetes <b>1</b></button></div>
+    <div class="tools">
+      <input type="search" id="q" placeholder="Search titles and summaries" aria-label="Search">
+      <label class="hide"><input type="checkbox" id="hideRead"> Hide read</label>
+    </div>
+  </div>
+  <main id="list">
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.18642" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>5h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.18642" target="_blank" rel="noopener">Agents Cannot Hand Over What They Have Not Yet Understood</a></h2>
+        <p>arXiv:2611.18642v1 Announce Type: new Abstract: Agents that work beyond a single context window, or in teams, hand their work to a successor as a short written summary. Evaluation has focused on whether an agent can solve a task, and relatively little is known about how much of...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.18714" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>5h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.18714" target="_blank" rel="noopener">How to make a moral agent: sentimentalism and rationalism as lenses on AI</a></h2>
+        <p>arXiv:2611.18714v1 Announce Type: new Abstract: Can AI systems be moral agents? That is, can they undertake actions that can be correctly assessed as morally right or wrong? There is no settled normative criterion of moral agency that applies neatly outside paradigm human cases....</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.18747" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>5h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.18747" target="_blank" rel="noopener">Video-as-Experience: Learning Computer Use via Audio-Visual Understanding</a></h2>
+        <p>arXiv:2611.18747v1 Announce Type: new Abstract: Multimodal large language models (LLMs) have enabled capable computer-use agents that perceive graphical user interfaces, reason over instructions, and execute actions. However, existing approaches to learning from video...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.18793" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>5h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.18793" target="_blank" rel="noopener">Multimodal Fusion: A Review of Breast Cancer Advanced and Traditional Modalities</a></h2>
+        <p>arXiv:2611.18793v1 Announce Type: new Abstract: Purpose: Multimodal medical imaging fusion (MMIF) is an increasingly important approach to breast cancer detection (BCD), as different imaging modalities rely on different physical principles and provide complementary information....</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Research" data-link="https://arxiv.org/abs/2611.18866" style="--h:95">
+        <div class="meta"><span class="cat">Research</span><span>arXiv cs.AI</span><span>5h ago</span></div>
+        <h2><a href="https://arxiv.org/abs/2611.18866" target="_blank" rel="noopener">D\&#x27;ecoupage: Directorial Audio-Visual Control for Long Multi-Shot Video Generation</a></h2>
+        <p>arXiv:2611.18866v1 Announce Type: new Abstract: In cinematic storytelling, sound and visual transitions do not always coincide in lockstep: dialogue frequently bridges across cuts to reveal reactions or introduces new scenes via J- and L-cuts, while deliberate silences pace the...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-16-dependabot-alert-dismissal-requests-now-last-one-year" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>10h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-16-dependabot-alert-dismissal-requests-now-last-one-year" target="_blank" rel="noopener">Dependabot alert dismissal requests now last one year</a></h2>
+        <p>If you use delegated alert dismissal for Dependabot, dismissal requests now stay open for one year instead of one week. Reviewers have more time to respond before a request expires… The post Dependabot alert dismissal requests now last one year appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/strengthening-nato-allied-cyber-defences-ai" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>10h ago</span></div>
+        <h2><a href="https://openai.com/index/strengthening-nato-allied-cyber-defences-ai" target="_blank" rel="noopener">Strengthening NATO and allied cyber defenses with AI</a></h2>
+        <p>How OpenAI is working with NATO and allied cyber agencies to help trusted defenders find vulnerabilities, test fixes and protect essential systems.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/cncf-bryce-ai-agents/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>12h ago</span></div>
+        <h2><a href="https://thenewstack.io/cncf-bryce-ai-agents/" target="_blank" rel="noopener">AI agents were all over KubeCon. Production is another story</a></h2>
+        <p>AI agents are testing systems that were originally built for people, and Jonathan Bryce thinks the cloud-nat</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-16-github-copilot-weekly-releases-november-9" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>13h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-16-github-copilot-weekly-releases-november-9" target="_blank" rel="noopener">GitHub Copilot weekly releases — November 9</a></h2>
+        <p>This week, bring GitHub Enterprise Server repositories into the Copilot app and see which agent sessions need you first in VS Code. You can also try two new models, Claude… The post GitHub Copilot weekly releases — November 9 appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-16-budget-limit-increased-to-40000-budgets-per-account" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>13h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-16-budget-limit-increased-to-40000-budgets-per-account" target="_blank" rel="noopener">Budget limit increased to 40,000 budgets per account</a></h2>
+        <p>You can now create up to 40,000 budgets per GitHub Enterprise Cloud account, up from 10,000. If you set budgets for individual users, or manage budgets across many cost centers… The post Budget limit increased to 40,000 budgets per account appeared first on The GitHub Blog .</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/autonomous-ai-exploit-agents/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>13h ago</span></div>
+        <h2><a href="https://thenewstack.io/autonomous-ai-exploit-agents/" target="_blank" rel="noopener">Google found hackers using autonomous AI agents to turn security patches into exploits</a></h2>
+        <p>Google’s Threat Intelligence Group says attackers are using autonomous AI agents to reverse-engineer security patches, generate exploits, and attempt to The post Google found hackers using autono</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-16-github-copilot-models-deprecated-on-november-16-2026" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>14h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-16-github-copilot-models-deprecated-on-november-16-2026" target="_blank" rel="noopener">GitHub Copilot models deprecated on November 16, 2026</a></h2>
+        <p>As of today, November 16, 2026, we have deprecated the following models across most GitHub Copilot experiences (including Copilot Chat, inline edits, ask and agent modes, and code completions). Note… The post GitHub Copilot models deprecated on November 16, 2026 appeared first...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud" data-link="https://aws.amazon.com/blogs/devops/how-british-airways-is-accelerating-the-modernization-of-its-java-services/" style="--h:28">
+        <div class="meta"><span class="cat">Cloud</span><span>AWS DevOps Blog</span><span>14h ago</span></div>
+        <h2><a href="https://aws.amazon.com/blogs/devops/how-british-airways-is-accelerating-the-modernization-of-its-java-services/" target="_blank" rel="noopener">How British Airways is accelerating the modernization of its Java services</a></h2>
+        <p>Learn how British Airways is using AWS Transform custom, agentic AI, and automation to accelerate the modernization of its Java services, migrating more than 250 business services from Amazon EC2 to a containerized, auto scaling architecture on Amazon ECS with AWS Fargate and...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="CI/CD and tooling" data-link="https://github.blog/changelog/2026-11-16-control-where-github-copilot-customizations-come-from" style="--h:148">
+        <div class="meta"><span class="cat">CI/CD and tooling</span><span>GitHub Changelog</span><span>15h ago</span></div>
+        <h2><a href="https://github.blog/changelog/2026-11-16-control-where-github-copilot-customizations-come-from" target="_blank" rel="noopener">Control where GitHub Copilot customizations come from</a></h2>
+        <p>As an enterprise administrator, you can now require selected GitHub Copilot customizations to come from plugins or managed settings, rather than standalone user or project configuration. Combined with marketplace restrictions,… The post Control where GitHub Copilot...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Kubernetes" data-link="https://kubernetes.io/blog/2026/11/16/ipvs-removal/" style="--h:250">
+        <div class="meta"><span class="cat">Kubernetes</span><span>Kubernetes Blog</span><span>16h ago</span></div>
+        <h2><a href="https://kubernetes.io/blog/2026/11/16/ipvs-removal/" target="_blank" rel="noopener">Scheduling the removal of the kube-proxy IPVS backend</a></h2>
+        <p>The ipvs backend for kube-proxy was an experiment in providing a service proxy implementation with better performance than the iptables backend. While it succeeded in that goal, the kernel IPVS API has turned out to be a bad match for the Kubernetes Services API, and the ipvs...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/opencode-browse-rust-rewrite/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>16h ago</span></div>
+        <h2><a href="https://thenewstack.io/opencode-browse-rust-rewrite/" target="_blank" rel="noopener">Dax Raad rebuilt his browser tool in Rust for $60. Then memory use fell 97%.</a></h2>
+        <p>OpenCode developer Dax Raad says he rebuilt the project’s browser automation tool in Rust for $60, replacing the parts of The post Dax Raad rebuilt his browser tool in Rust for $60. Then memory use fell 97%. appeared fir</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud" data-link="https://aws.amazon.com/blogs/devops/a-governed-ai-driven-development-lifecycle-for-financial-services-with-kiro-and-aws-frontier-agents/" style="--h:28">
+        <div class="meta"><span class="cat">Cloud</span><span>AWS DevOps Blog</span><span>17h ago</span></div>
+        <h2><a href="https://aws.amazon.com/blogs/devops/a-governed-ai-driven-development-lifecycle-for-financial-services-with-kiro-and-aws-frontier-agents/" target="_blank" rel="noopener">A governed AI-driven development lifecycle for financial services with Kiro and AWS Frontier Agents</a></h2>
+        <p>A hands-on walkthrough of a governed, AI-driven development lifecycle for financial services that wires Kiro, AWS Security Agent, and AWS DevOps Agent into a shared GitHub-based pipeline, so every change is authored, reviewed, security-gated, deployed to AWS Lambda, and...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/expanding-chatgpt-for-academic-researchers" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>17h ago</span></div>
+        <h2><a href="https://openai.com/index/expanding-chatgpt-for-academic-researchers" target="_blank" rel="noopener">Broadening access to AI for scientists</a></h2>
+        <p>We’re expanding our ChatGPT for Academic Researchers program to offer 200,000 researchers worldwide free access to our frontier models.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/strengthening-online-child-safety" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>17h ago</span></div>
+        <h2><a href="https://openai.com/index/strengthening-online-child-safety" target="_blank" rel="noopener">Strengthening the fight against online child sexual abuse with new tools and support</a></h2>
+        <p>New tools, practical guidance, and partnerships will help prevent, detect and respond to online child sexual exploitation and abuse.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Industry" data-link="https://thenewstack.io/qwen4-max-alibaba-open-weights/" style="--h:46">
+        <div class="meta"><span class="cat">Industry</span><span>The New Stack</span><span>18h ago</span></div>
+        <h2><a href="https://thenewstack.io/qwen4-max-alibaba-open-weights/" target="_blank" rel="noopener">With Qwen4-Max, Alibaba puts the open source jacket back on the hanger</a></h2>
+        <p>Alibaba has officially unveiled Qwen4-Max, the first model in its next-generation Qwen4 family, with a focus on complex professional tasks The post With Qwen4-Max, Alibaba puts the open source jacket back on the</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Cloud" data-link="https://aws.amazon.com/blogs/devops/php2shell-using-aws-transform-to-move-legacy-php-onto-a-patched-runtime/" style="--h:28">
+        <div class="meta"><span class="cat">Cloud</span><span>AWS DevOps Blog</span><span>18h ago</span></div>
+        <h2><a href="https://aws.amazon.com/blogs/devops/php2shell-using-aws-transform-to-move-legacy-php-onto-a-patched-runtime/" target="_blank" rel="noopener">PHP2Shell: Using AWS Transform to move legacy PHP onto a patched runtime</a></h2>
+        <p>Teams on PHP 8.1 or older can&#x27;t patch the PHP2Shell vulnerabilities (CVE-2026-109618 and CVE-2026-109619) in place. Learn how to use AWS Transform continuous modernization to find legacy PHP, upgrade it to PHP 8.4 or 8.5, validate it on a patched runtime, and then patch and...</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="Containers" data-link="https://www.docker.com/blog/docker-sandboxes-firecrawl-web-access/" style="--h:200">
+        <div class="meta"><span class="cat">Containers</span><span>Docker Blog</span><span>20h ago</span></div>
+        <h2><a href="https://www.docker.com/blog/docker-sandboxes-firecrawl-web-access/" target="_blank" rel="noopener">Give sandboxed agents live web access with the Firecrawl kit for Docker Sandboxes</a></h2>
+        <p>Give AI coding agents live web access with the Firecrawl kit for Docker Sandboxes. Learn to search, scrape, and crawl websites with network controls.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://blog.google/products-and-platforms/products/maps/ask-maps-holiday-travel-features-2026/" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>Google AI</span><span>20h ago</span></div>
+        <h2><a href="https://blog.google/products-and-platforms/products/maps/ask-maps-holiday-travel-features-2026/" target="_blank" rel="noopener">New Ask Maps features to help with holiday travel and prep</a></h2>
+        <p>tbd</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+      <article class="item" data-cat="AI labs" data-link="https://openai.com/index/science-at-the-frontier" style="--h:4">
+        <div class="meta"><span class="cat">AI labs</span><span>OpenAI</span><span>22h ago</span></div>
+        <h2><a href="https://openai.com/index/science-at-the-frontier" target="_blank" rel="noopener">Science at the Frontier: How scientists use ChatGPT</a></h2>
+        <p>Explore how more than 1,800 scientists use ChatGPT in research. See findings on daily workflows, reported productivity, and expectations for discovery.</p>
+        <button class="read-btn" type="button">Mark as read</button>
+      </article>
+  </main>
+</div>
+<script>
+  const KEY = "digest-read-links";
+  let read = new Set();
+  try { read = new Set(JSON.parse(localStorage.getItem(KEY) || "[]")); } catch (e) {}
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify([...read])); } catch (e) {} };
+
+  const items = [...document.querySelectorAll(".item")];
+  const q = document.getElementById("q");
+  const hideRead = document.getElementById("hideRead");
+  let cat = "all";
+
+  function apply() {
+    const term = q.value.trim().toLowerCase();
+    for (const el of items) {
+      const isRead = read.has(el.dataset.link);
+      el.classList.toggle("read", isRead);
+      el.querySelector(".read-btn").textContent = isRead ? "Read" : "Mark as read";
+      const show = (cat === "all" || el.dataset.cat === cat)
+        && (!term || el.textContent.toLowerCase().includes(term))
+        && !(hideRead.checked && isRead);
+      el.classList.toggle("hidden", !show);
+    }
+  }
+
+  document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+    document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+    chip.classList.add("active");
+    cat = chip.dataset.cat;
+    apply();
+  }));
+
+  for (const el of items) {
+    el.querySelector(".read-btn").addEventListener("click", () => {
+      const link = el.dataset.link;
+      read.has(link) ? read.delete(link) : read.add(link);
+      save(); apply();
+    });
+    el.querySelector("h2 a").addEventListener("click", () => { read.add(el.dataset.link); save(); apply(); });
+  }
+  q.addEventListener("input", apply);
+  hideRead.addEventListener("change", apply);
+  apply();
+</script>
+</body>
+</html>
